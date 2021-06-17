@@ -2,16 +2,17 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Hello wasm-pack!</title>
+    <title>Find the relation!</title>
   </head>
   <body>
     <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
     <script src="./bootstrap.js"></script>
+    <table>
+      <tr><td></td><td><button id="north-button">North</button></td><td></td></tr>
+      <tr><td><button id="west-button">West</button></td><td></td><td><button id="east-button">East</button></td></tr>
+      <tr><td></td><td><button id="south-button">South</button></td><td></td></tr>
+    </table>
     <div id="word"></div>
-    <button id="north-button">North</button>
-    <button id="south-button">South</button>
-    <button id="east-button">East</button>
-    <button id="west-button">West</button>
-    <div id="boo"></div>
+    <div id="matrices"></div>
   </body>
 </html>

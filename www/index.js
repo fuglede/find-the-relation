@@ -44,30 +44,29 @@ function move(direction, symbol, opposite) {
     update_table();
 }
 
-const northButton = document.getElementById("north-button");
-northButton.addEventListener("click", moveNorth);
-const southButton = document.getElementById("south-button");
-southButton.addEventListener("click", moveSouth);
-const eastButton = document.getElementById("east-button");
-eastButton.addEventListener("click", moveEast);
-const westButton = document.getElementById("west-button");
-westButton.addEventListener("click", moveWest);
+document.getElementById("north-button").addEventListener("click", moveNorth);
+document.getElementById("south-button").addEventListener("click", moveSouth);
+document.getElementById("east-button").addEventListener("click", moveEast);
+document.getElementById("west-button").addEventListener("click", moveWest);
 
 function update_table() {
     var el = "";
     var evaluated = easy.evaluated();
     var is_trivial = easy.evaluation_is_trivial();
+    document.getElementById("matrices").innerHTML = '';
     for (var i = 0; i < 3; i++) {
-        var color = is_trivial[i] && word.textContent != "" ? "green" : "red";
-        el += "<div style=\"margin-top: 20px; background-color:" + color +"\"><table>"
+        var div = document.createElement("div");
+        div.style.marginTop = "20px";
+        div.style.backgroundColor = is_trivial[i] && word.textContent != "" ? "green" : "red";
+        var tbl = document.createElement("table");
+        div.appendChild(tbl);
         for (var j = 0; j < 3; j++) {
-            el += "<tr>"
+            var tr = tbl.insertRow()
             for (var k = 0; k < 3; k++) {
-                el += "<td>" + evaluated[9*i + 3*j + k] + "</td>";
+                var td = tr.insertCell();
+                td.appendChild(document.createTextNode(evaluated[9*i + 3*j + k]));
             }
-            el += "</tr>";
         }
-        el += "</table></div>";
+        document.getElementById("matrices").appendChild(div);
     }
-    document.getElementById("boo").innerHTML = el
 }
