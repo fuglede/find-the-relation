@@ -1,6 +1,6 @@
 use crate::algebra::{Polynomial,Matrix};
 use wasm_bindgen::prelude::*;
-use num::complex::Complex;
+use num::{Zero, complex::Complex};
 use std::collections::HashMap;
 
 #[repr(u8)]
@@ -117,24 +117,23 @@ impl Group {
         self.current_matrix = &self.current_matrix * &matrix;
     }
 
-    pub fn evaluate(&self, q: Complex<f64>) -> [f64; 18] {
-        let mut res: [f64; 18] = [0.0; 18];
+    pub fn evaluate(&self, q: Complex<f64>) -> [Complex<f64>; 9] {
+        let mut res: [Complex<f64>; 9] = [Complex::new(0.0, 0.0); 9];
         for i in 0..3 {
             for j in 0..3 {
-                let index = 2*(i*3 + j);
+                let index = 3*i + j;
                 let evaluation = evaluate_polynomial(&self.current_matrix.d[i][j], q);
-                res[index] = evaluation.re;
-                res[index + 1] = evaluation.im;
+                res[index] = evaluation;
             }
         }
         res
     }
 }
 
-fn evaluated_matrix_is_trivial(matrix: [f64; 18]) -> bool {
-    (0..18).all(|i| matrix[i] == match i {
-        0 | 8 | 16 => 1.0,
-        _ => 0.0
+pub fn evaluated_matrix_is_trivial(matrix: [Complex<f64>; 9]) -> bool {
+    (0..9).all(|i| matrix[i] == match i {
+        0 | 4 | 8 => Complex::new(1.0, 0.0),
+        _ => Complex::zero()
     })
 }
 
