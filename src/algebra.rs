@@ -1,50 +1,12 @@
 //use hashbrown::HashMap;
 use std::collections::HashMap;
-use std::ops::{Add, Mul};
+use std::ops::{Mul};
 
 use num::{BigInt, Complex, ToPrimitive};
 
 #[derive(Debug)]
 pub struct Polynomial {
     pub data: HashMap<i32, BigInt>
-}
-
-impl Add for &Polynomial {
-    type Output = Polynomial;
-
-    fn add(self, rhs: &Polynomial) -> Polynomial {
-        let mut c = HashMap::new();
-        for (a_pow, a_coef) in self.data.iter() {
-            *c.entry(*a_pow).or_insert(BigInt::from(0)) += a_coef;
-        }
-        for (b_pow, b_coef) in rhs.data.iter() {
-            *c.entry(*b_pow).or_insert(BigInt::from(0)) += b_coef;
-        }
-        c.retain(|_, v| *v != BigInt::from(0));
-        Polynomial { data: c }
-    }
-}
-
-impl Mul for &Polynomial {
-    type Output = Polynomial;
-
-    fn mul(self, rhs: &Polynomial) -> Polynomial {
-        let mut c = HashMap::new();
-        for (a_pow, a_coef) in self.data.iter() {
-            for (b_pow, b_coef) in rhs.data.iter() {
-                *c.entry(a_pow + b_pow).or_insert(BigInt::from(0)) +=
-                    a_coef * b_coef;
-            }
-        }
-        c.retain(|_, v| *v != BigInt::from(0));
-        Polynomial { data: c }
-    }
-}
-
-impl PartialEq for Polynomial {
-    fn eq(&self, rhs: &Polynomial) -> bool {
-        self.data == rhs.data
-    }
 }
 
 impl Polynomial {
@@ -54,10 +16,6 @@ impl Polynomial {
             data.insert(a, BigInt::from(b));
         }
         Polynomial { data }
-    }
-
-    pub fn zero() -> Polynomial {
-        Self::new(vec![])
     }
 
     pub fn one() -> Polynomial {
@@ -123,50 +81,6 @@ impl Matrix {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn add_polynomial_overlapping_coefficient() {
-        let a = Polynomial::new(vec![(1, 1), (2, 2)]);
-        let b = Polynomial::new(vec![(0, -1), (1, 1)]);
-        let c = (&a + &b).data;
-        assert_eq!(c.values().count(), 3);
-        assert_eq!(c[&0], BigInt::from(-1));
-        assert_eq!(c[&1], BigInt::from(2));
-        assert_eq!(c[&2], BigInt::from(2));
-    }
-
-    #[test]
-    fn add_polynomial_terms_cancel() {
-        let a = Polynomial::new(vec![(1, 1), (2, 2)]);
-        let b = Polynomial::new(vec![(0, -1), (1, -1)]);
-        let c = (&a + &b).data;
-        assert_eq!(c.values().count(), 2);
-        assert_eq!(c[&0], BigInt::from(-1));
-        assert_eq!(c[&2], BigInt::from(2));
-    }
-
-    #[test]
-    fn multiply_polynomial_negative_coefficient() {
-        let a = Polynomial::new(vec![(1, 1), (2, 2)]);
-        let b = Polynomial::new(vec![(0, -1)]);
-        let c = (&a * &b).data;
-        // (t + 2t^2) * (-1) = -t - 2t^2
-        assert_eq!(c.values().count(), 2);
-        assert_eq!(c[&1], BigInt::from(-1));
-        assert_eq!(c[&2], BigInt::from(-2));
-    }
-
-    #[test]
-    fn multiply_polynomial_terms_cancel() {
-        let a = Polynomial::new(vec![(-2, 2), (2, 2)]);
-        let b = Polynomial::new(vec![(-2, 2), (2, 2)]);
-        let c = (&a * &b).data;
-        // (2t^{-2} + 2t^2) * (2t^{-2} + 2t^2) = 4t^{-4} + 8 + 4t^4
-        assert_eq!(c.values().count(), 3);
-        assert_eq!(c[&-4], BigInt::from(4));
-        assert_eq!(c[&0], BigInt::from(8));
-        assert_eq!(c[&-4], BigInt::from(4));
-    }
 
     #[test]
     fn multiply_matrix_two_identities() {
@@ -236,7 +150,7 @@ mod tests {
 
     #[test]
     fn evaluate_polynomial_trivial_polynomial() {
-        let p = Polynomial::zero();
+        let p = Polynomial::new(vec![]);
         assert_eq!(Complex::new(0.0, 0.0), p.evaluate(&Complex::new(1.0, 0.0)));
         assert_eq!(Complex::new(0.0, 0.0), p.evaluate(&Complex::new(0.0, 1.0)));
         assert_eq!(Complex::new(0.0, 0.0), p.evaluate(&Complex::new(1.0, 1.0)));

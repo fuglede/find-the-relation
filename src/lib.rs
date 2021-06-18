@@ -3,7 +3,7 @@ mod utils;
 mod group;
 
 use js_sys::{Array};
-use num::{Complex, One};
+use num::{Complex};
 use num::integer::{div_mod_floor};
 use wasm_bindgen::prelude::*;
 use crate::group::{Direction, Group, evaluated_matrix_is_trivial};

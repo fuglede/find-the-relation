@@ -1,8 +1,6 @@
 use crate::algebra::{Polynomial,Matrix};
 use wasm_bindgen::prelude::*;
-use num::{ToPrimitive, Zero, complex::Complex};
-
-use std::collections::HashMap;
+use num::{Zero, complex::Complex};
 
 #[repr(u8)]
 #[wasm_bindgen]
@@ -87,10 +85,6 @@ pub fn evaluated_matrix_is_trivial(matrix: [Complex<f64>; 9]) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use core::panic;
-
-    use num::BigInt;
-
     use super::*;
 
     #[test]
