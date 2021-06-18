@@ -1,5 +1,4 @@
-//use hashbrown::HashMap;
-use std::collections::HashMap;
+use hashbrown::HashMap;
 use std::ops::Mul;
 
 use num::Complex;
