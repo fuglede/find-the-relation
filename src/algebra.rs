@@ -81,6 +81,7 @@ impl Matrix {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use num::{One, Zero};
 
     #[test]
     fn multiply_matrix_two_identities() {
@@ -97,7 +98,7 @@ mod tests {
         let pol = Polynomial::new(vec![(-2, 2), (-2, 2)]).evaluate(&q);
         let pol2 = Polynomial::new(vec![(-2, 2), (-2, 2)]).evaluate(&q);
         let mut b = Matrix::zero();
-        b.d[0][1] = Complex::new(1.0, 0.0);
+        b.d[0][1] = Complex::one();
         b.d[0][2] = pol;
         b.d[2][1] = pol2;
         let c = &a * &b;
@@ -111,7 +112,7 @@ mod tests {
         let pol2 = Polynomial::new(vec![(-2, 2), (-2, 2)]).evaluate(&q);
         let a = Matrix::zero();
         let mut b = Matrix::zero();
-        b.d[0][1] = Complex::new(1.0, 0.0);
+        b.d[0][1] = Complex::one();
         b.d[0][2] = pol;
         b.d[2][1] = pol2;
         let c = &a * &b;
@@ -151,17 +152,17 @@ mod tests {
     #[test]
     fn evaluate_polynomial_trivial_polynomial() {
         let p = Polynomial::new(vec![]);
-        assert_eq!(Complex::new(0.0, 0.0), p.evaluate(&Complex::new(1.0, 0.0)));
-        assert_eq!(Complex::new(0.0, 0.0), p.evaluate(&Complex::new(0.0, 1.0)));
-        assert_eq!(Complex::new(0.0, 0.0), p.evaluate(&Complex::new(1.0, 1.0)));
+        assert_eq!(Complex::zero(), p.evaluate(&Complex::new(1.0, 0.0)));
+        assert_eq!(Complex::zero(), p.evaluate(&Complex::new(0.0, 1.0)));
+        assert_eq!(Complex::zero(), p.evaluate(&Complex::new(1.0, 1.0)));
     }
 
     #[test]
     fn evaluate_polynomial_constant_polynomial() {
         let p = Polynomial::one();
-        assert_eq!(Complex::new(1.0, 0.0), p.evaluate(&Complex::new(1.0, 0.0)));
-        assert_eq!(Complex::new(1.0, 0.0), p.evaluate(&Complex::new(0.0, 1.0)));
-        assert_eq!(Complex::new(1.0, 0.0), p.evaluate(&Complex::new(1.0, 1.0)));
+        assert_eq!(Complex::one(), p.evaluate(&Complex::new(1.0, 0.0)));
+        assert_eq!(Complex::one(), p.evaluate(&Complex::new(0.0, 1.0)));
+        assert_eq!(Complex::one(), p.evaluate(&Complex::new(1.0, 1.0)));
     }
 
     #[test]
