@@ -1,5 +1,4 @@
 mod algebra;
-mod utils;
 mod group;
 
 use js_sys::{Array};
@@ -26,7 +25,7 @@ impl Game {
     pub fn easy() -> Game {
         let groups = [
             Group::new(&Complex::new(1.0, 0.0)),
-            Group::new(&Complex::new(-1.0, 0.0)),
+            Group::new(&Complex::new(0.5, 0.0)),
             Group::new(&Complex::new(0.0, 1.0))
             ];
         let evaluated = [groups[0].flatten(), groups[1].flatten(), groups[2].flatten()];
@@ -52,6 +51,17 @@ impl Game {
         for i in 0..27 {
             let (j, k) = div_mod_floor(i, 9);
             let s = JsValue::from_str(&format!("{}", self.evaluated[j][k]));
+            arr.set(i as u32, s);
+        }
+        arr
+    }
+
+    pub fn evaluated_polar(&self) -> Array {
+        let arr = Array::new_with_length(27);
+        for i in 0..27 {
+            let (j, k) = div_mod_floor(i, 9);
+            let (r, theta) =  self.evaluated[j][k].to_polar();
+            let s = JsValue::from_str(&format!("({}, {})", r, theta));
             arr.set(i as u32, s);
         }
         arr

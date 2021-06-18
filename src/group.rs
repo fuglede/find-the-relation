@@ -1,6 +1,6 @@
-use crate::algebra::{Polynomial,Matrix};
+use crate::algebra::{evaluate_polynomial, Matrix};
 use wasm_bindgen::prelude::*;
-use num::{Zero, One, complex::Complex};
+use num::complex::Complex;
 
 #[repr(u8)]
 #[wasm_bindgen]
@@ -24,30 +24,30 @@ impl Group {
     pub fn new(q: &Complex<f64>) -> Self {
         // See https://arxiv.org/abs/1904.11730v3
         let mut north_matrix = Matrix::zero();
-        north_matrix.d[0][2] = Polynomial::new(vec![(-1, -1)]).evaluate(q);
-        north_matrix.d[1][1] = Polynomial::new(vec![(1, -1)]).evaluate(q);
-        north_matrix.d[1][2] = Polynomial::new(vec![(-1, -1), (1, 1)]).evaluate(q);
-        north_matrix.d[2][0] = Polynomial::new(vec![(0, -1)]).evaluate(q);
-        north_matrix.d[2][2] = Polynomial::new(vec![(-1, -1), (0, 1)]).evaluate(q);
+        north_matrix.d[0][2] = evaluate_polynomial(&vec![(-1, -1)], &q);
+        north_matrix.d[1][1] = evaluate_polynomial(&vec![(1, -1)], &q);
+        north_matrix.d[1][2] = evaluate_polynomial(&vec![(-1, -1), (1, 1)], &q);
+        north_matrix.d[2][0] = evaluate_polynomial(&vec![(0, -1)], &q);
+        north_matrix.d[2][2] = evaluate_polynomial(&vec![(-1, -1), (0, 1)], &q);
 
         let mut south_matrix = Matrix::zero();
-        south_matrix.d[0][0] = Polynomial::new(vec![(0, 1), (1, -1)]).evaluate(q);
-        south_matrix.d[0][2] = Polynomial::new(vec![(0, -1)]).evaluate(q);
-        south_matrix.d[1][0] = Polynomial::new(vec![(-1, 1), (1, -1)]).evaluate(q);
-        south_matrix.d[1][1] = Polynomial::new(vec![(-1, -1)]).evaluate(q);
-        south_matrix.d[2][0] = Polynomial::new(vec![(1, -1)]).evaluate(q);
+        south_matrix.d[0][0] = evaluate_polynomial(&vec![(0, 1), (1, -1)], &q);
+        south_matrix.d[0][2] = evaluate_polynomial(&vec![(0, -1)], &q);
+        south_matrix.d[1][0] = evaluate_polynomial(&vec![(-1, 1), (1, -1)], &q);
+        south_matrix.d[1][1] = evaluate_polynomial(&vec![(-1, -1)], &q);
+        south_matrix.d[2][0] = evaluate_polynomial(&vec![(1, -1)], &q);
 
         let mut east_matrix = Matrix::identity();
-        east_matrix.d[0][0] = Polynomial::new(vec![(-1, -1)]).evaluate(q);
-        east_matrix.d[0][1] = Polynomial::one().evaluate(q);
-        east_matrix.d[2][1] = Polynomial::one().evaluate(q);
-        east_matrix.d[2][2] = Polynomial::new(vec![(1, -1)]).evaluate(q);
+        east_matrix.d[0][0] = evaluate_polynomial(&vec![(-1, -1)], &q);
+        east_matrix.d[0][1] = evaluate_polynomial(&vec![(0, 1)], &q);
+        east_matrix.d[2][1] = evaluate_polynomial(&vec![(0, 1)], &q);
+        east_matrix.d[2][2] = evaluate_polynomial(&vec![(1, -1)], &q);
 
         let mut west_matrix = Matrix::identity();
-        west_matrix.d[0][0] = Polynomial::new(vec![(1, -1)]).evaluate(q);
-        west_matrix.d[0][1] = Polynomial::new(vec![(1, 1)]).evaluate(q);
-        west_matrix.d[2][1] = Polynomial::new(vec![(-1, 1)]).evaluate(q);
-        west_matrix.d[2][2] = Polynomial::new(vec![(-1, -1)]).evaluate(q);
+        west_matrix.d[0][0] = evaluate_polynomial(&vec![(1, -1)], &q);
+        west_matrix.d[0][1] = evaluate_polynomial(&vec![(1, 1)], &q);
+        west_matrix.d[2][1] = evaluate_polynomial(&vec![(-1, 1)], &q);
+        west_matrix.d[2][2] = evaluate_polynomial(&vec![(-1, -1)], &q);
 
         let current_matrix = Matrix::identity();
         Self { north_matrix, south_matrix, east_matrix, west_matrix, current_matrix }
@@ -64,7 +64,7 @@ impl Group {
     }
 
     pub fn flatten(&self) -> [Complex<f64>; 9] {
-        let mut res: [Complex<f64>; 9] = [Complex::zero(); 9];
+        let mut res: [Complex<f64>; 9] = [Complex::new(0.0, 0.0); 9];
         for i in 0..3 {
             for j in 0..3 {
                 let index = 3*i + j;
@@ -77,8 +77,8 @@ impl Group {
 
 pub fn evaluated_matrix_is_trivial(matrix: [Complex<f64>; 9]) -> bool {
     (0..9).all(|i| matrix[i] == match i {
-        0 | 4 | 8 => Complex::one(),
-        _ => Complex::zero()
+        0 | 4 | 8 => Complex::new(1.0, 0.0),
+        _ => Complex::new(0.0, 0.0)
     })
 }
 
