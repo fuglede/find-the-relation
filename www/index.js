@@ -57,7 +57,7 @@ function update_table() {
     for (var i = 0; i < 3; i++) {
         var div = document.createElement("div");
         div.style.marginTop = "20px";
-        div.style.backgroundColor = is_trivial[i] && word.textContent != "" ? "green" : "red";
+        div.style.backgroundColor = is_trivial[i] && word.textContent != "" ? "#77dd77" : "#ff6961";
         var tbl = document.createElement("table");
         div.appendChild(tbl);
         for (var j = 0; j < 3; j++) {
