@@ -1,6 +1,6 @@
 use crate::algebra::{Polynomial,Matrix};
 use wasm_bindgen::prelude::*;
-use num::{Zero, complex::Complex};
+use num::{ToPrimitive, Zero, complex::Complex};
 use std::collections::HashMap;
 
 #[repr(u8)]
@@ -25,83 +25,30 @@ impl Group {
     pub fn new() -> Self {
         // See https://arxiv.org/abs/1904.11730v3
         let mut north_matrix = Matrix::zero();
-
-        let mut map_north_r1c3 = HashMap::new();
-        map_north_r1c3.insert(-1, -1);
-        north_matrix.d[0][2] = Polynomial { data: map_north_r1c3 };
-
-        let mut map_north_r2c2 = HashMap::new();
-        map_north_r2c2.insert(1, -1);
-        north_matrix.d[1][1] = Polynomial { data: map_north_r2c2 };
-
-        let mut map_north_r2c3 = HashMap::new();
-        map_north_r2c3.insert(-1, -1);
-        map_north_r2c3.insert(1, 1);
-        north_matrix.d[1][2] = Polynomial { data: map_north_r2c3 };
-
-        let mut map_north_r3c1 = HashMap::new();
-        map_north_r3c1.insert(0, -1);
-        north_matrix.d[2][0] = Polynomial { data: map_north_r3c1 };
-
-        let mut map_north_r3c3 = HashMap::new();
-        map_north_r3c3.insert(-1, -1);
-        map_north_r3c3.insert(0, 1);
-        north_matrix.d[2][2] = Polynomial { data: map_north_r3c3 };
+        north_matrix.d[0][2] = Polynomial::new(vec![(-1, -1)]);
+        north_matrix.d[1][1] = Polynomial::new(vec![(1, -1)]);
+        north_matrix.d[1][2] = Polynomial::new(vec![(-1, -1), (1, 1)]);
+        north_matrix.d[2][0] = Polynomial::new(vec![(0, -1)]);
+        north_matrix.d[2][2] = Polynomial::new(vec![(-1, -1), (0, 1)]);
 
         let mut south_matrix = Matrix::zero();
-
-        let mut map_south_r1c1 = HashMap::new();
-        map_south_r1c1.insert(0, 1);
-        map_south_r1c1.insert(1, -1);
-        south_matrix.d[0][0] = Polynomial { data: map_south_r1c1 };
-        
-        let mut map_south_r1c3 = HashMap::new();
-        map_south_r1c3.insert(0, -1);
-        south_matrix.d[0][2] = Polynomial { data: map_south_r1c3 };
-        
-        let mut map_south_r2c1 = HashMap::new();
-        map_south_r2c1.insert(-1, 1);
-        map_south_r2c1.insert(1, -1);
-        south_matrix.d[1][0] = Polynomial { data: map_south_r2c1 };
-        
-        let mut map_south_r2c2 = HashMap::new();
-        map_south_r2c2.insert(-1, -1);
-        south_matrix.d[1][1] = Polynomial { data: map_south_r2c2 };
-        
-        let mut map_south_r3c1 = HashMap::new();
-        map_south_r3c1.insert(1, -1);
-        south_matrix.d[2][0] = Polynomial { data: map_south_r3c1 };
+        south_matrix.d[0][0] = Polynomial::new(vec![(0, 1), (1, -1)]);
+        south_matrix.d[0][2] = Polynomial::new(vec![(0, -1)]);
+        south_matrix.d[1][0] = Polynomial::new(vec![(-1, 1), (1, -1)]);
+        south_matrix.d[1][1] = Polynomial::new(vec![(-1, -1)]);
+        south_matrix.d[2][0] = Polynomial::new(vec![(1, -1)]);
 
         let mut east_matrix = Matrix::identity();
-
-        let mut map_east_r1c1 = HashMap::new();
-        map_east_r1c1.insert(-1, -1);
-        east_matrix.d[0][0] = Polynomial { data: map_east_r1c1 };
-
+        east_matrix.d[0][0] = Polynomial::new(vec![(-1, -1)]);
         east_matrix.d[0][1] = Polynomial::one();
         east_matrix.d[2][1] = Polynomial::one();
-
-        let mut map_east_r3c3 = HashMap::new();
-        map_east_r3c3.insert(1, -1);
-        east_matrix.d[2][2] = Polynomial { data: map_east_r3c3 };
+        east_matrix.d[2][2] = Polynomial::new(vec![(1, -1)]);
 
         let mut west_matrix = Matrix::identity();
-
-        let mut map_west_r1c1 = HashMap::new();
-        map_west_r1c1.insert(1, -1);
-        west_matrix.d[0][0] = Polynomial { data: map_west_r1c1 };
-
-        let mut map_west_r1c2 = HashMap::new();
-        map_west_r1c2.insert(1, 1);
-        west_matrix.d[0][1] = Polynomial { data: map_west_r1c2 };
-
-        let mut map_west_r3c2 = HashMap::new();
-        map_west_r3c2.insert(-1, 1);
-        west_matrix.d[2][1] = Polynomial { data: map_west_r3c2 };
-
-        let mut map_west_r3c3 = HashMap::new();
-        map_west_r3c3.insert(-1, -1);
-        west_matrix.d[2][2] = Polynomial { data: map_west_r3c3 };
+        west_matrix.d[0][0] = Polynomial::new(vec![(1, -1)]);
+        west_matrix.d[0][1] = Polynomial::new(vec![(1, 1)]);
+        west_matrix.d[2][1] = Polynomial::new(vec![(-1, 1)]);
+        west_matrix.d[2][2] = Polynomial::new(vec![(-1, -1)]);
 
         let current_matrix = Matrix::identity();
         Self { north_matrix, south_matrix, east_matrix, west_matrix, current_matrix }
@@ -140,13 +87,15 @@ pub fn evaluated_matrix_is_trivial(matrix: [Complex<f64>; 9]) -> bool {
 fn evaluate_polynomial(p: &Polynomial, q: Complex<f64>) -> Complex<f64> {
     let mut res = Complex::new(0.0, 0.0);
     for (pow, coef) in p.data.iter() {
-        res += (*coef as f64) * q.powi(*pow)
+        res += (*coef).to_f64().unwrap() * q.powi(*pow)
     }
     res
 }
 
 #[cfg(test)]
 mod tests {
+    use core::panic;
+
     use super::*;
 
     #[test]
@@ -206,6 +155,43 @@ mod tests {
     }
 
     #[test]
+    fn long_word() {
+        let s = "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEESSSSSSWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNWSSWWSWSWSWSWSSWWWWNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNWWWWWWWWSSWSWSWSWNENNWNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNEEEEEEEEEEEEE";
+        let mut group = Group::new();
+        for c in s.chars() {
+            let direction = match c {
+                'N' => Direction::North,
+                'S' => Direction::South,
+                'E' => Direction::East,
+                'W' => Direction::West,
+                _ => panic!()
+            };
+            group.push(&direction);
+        }
+        let eval = group.evaluate(Complex::new(-1.0, 0.0));
+        let res = &format!("{}", eval[7]);
+        assert_eq!(eval[7], Complex::new(-1.0, 0.0));
+    }
+    #[test]
+    fn long_word2() {
+        let s = "EEEESWWWNNNNENNWNEENWSWNEENNNESWNENENWSEENWNESSENWNEEEEEEEEEEEEEEEEEEEEEEEEEEEEESWWWWWWWWWWWWWWWWWWWWWWWWWNNNNNNNNNNNNNNNNNNNNNNNNNWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEENESWNWNWNWNWWWWWWWWWWWWWWWWWNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNESSSSEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSSSSSSSSSSSSWNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNWS";
+        let mut group = Group::new();
+        for c in s.chars() {
+            let direction = match c {
+                'N' => Direction::North,
+                'S' => Direction::South,
+                'E' => Direction::East,
+                'W' => Direction::West,
+                _ => panic!()
+            };
+            group.push(&direction);
+        }
+        let eval = group.evaluate(Complex::new(-1.0, 0.0));
+        let res = &format!("{}", eval[3]);
+        assert_eq!(eval[7], Complex::new(-1.0, 0.0));
+    }
+
+    #[test]
     fn evaluate_polynomial_trivial_polynomial() {
         let p = Polynomial::zero();
         assert_eq!(Complex::new(0.0, 0.0), evaluate_polynomial(&p, Complex::new(1.0, 0.0)));
@@ -223,9 +209,7 @@ mod tests {
 
     #[test]
     fn evaluate_polynomial_linear_polynomial() {
-        let mut map = HashMap::new();
-        map.insert(1, 2);
-        let p = Polynomial { data: map };
+        let p = Polynomial::new(vec![(1, 2)]);
         assert_eq!(Complex::new(2.0, 0.0), evaluate_polynomial(&p, Complex::new(1.0, 0.0)));
         assert_eq!(Complex::new(0.0, 2.0), evaluate_polynomial(&p, Complex::new(0.0, 1.0)));
         assert_eq!(Complex::new(2.0, 2.0), evaluate_polynomial(&p, Complex::new(1.0, 1.0)));
@@ -233,10 +217,7 @@ mod tests {
 
     #[test]
     fn evaluate_polynomial_non_trivial_polynomial() {
-        let mut map = HashMap::new();
-        map.insert(-2, -2);
-        map.insert(2, -2);
-        let p = Polynomial { data: map };
+        let p = Polynomial::new(vec![(-2, -2), (2, -2)]);
         assert_eq!(Complex::new(-4.0, 0.0), evaluate_polynomial(&p, Complex::new(1.0, 0.0)));
         assert_eq!(Complex::new(4.0, 0.0), evaluate_polynomial(&p, Complex::new(0.0, 1.0)));
         assert_eq!(Complex::new(0.0, -3.0), evaluate_polynomial(&p, Complex::new(1.0, 1.0)));
