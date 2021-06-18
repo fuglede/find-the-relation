@@ -63,6 +63,34 @@ mod tests {
     use num::{One, Zero};
 
     #[test]
+    fn evaluate_polynomial_trivial_polynomial() {
+        assert_eq!(Complex::zero(), evaluate_polynomial(&vec![], &Complex::new(1.0, 0.0)));
+        assert_eq!(Complex::zero(), evaluate_polynomial(&vec![], &Complex::new(0.0, 1.0)));
+        assert_eq!(Complex::zero(), evaluate_polynomial(&vec![], &Complex::new(1.0, 1.0)));
+    }
+
+    #[test]
+    fn evaluate_polynomial_constant_polynomial() {
+        assert_eq!(Complex::one(), evaluate_polynomial(&vec![(0, 1)], &Complex::new(1.0, 0.0)));
+        assert_eq!(Complex::one(), evaluate_polynomial(&vec![(0, 1)], &Complex::new(0.0, 1.0)));
+        assert_eq!(Complex::one(), evaluate_polynomial(&vec![(0, 1)], &Complex::new(1.0, 1.0)));
+    }
+
+    #[test]
+    fn evaluate_polynomial_linear_polynomial() {
+        assert_eq!(Complex::new(2.0, 0.0), evaluate_polynomial(&vec![(1, 2)], &Complex::new(1.0, 0.0)));
+        assert_eq!(Complex::new(0.0, 2.0), evaluate_polynomial(&vec![(1, 2)], &Complex::new(0.0, 1.0)));
+        assert_eq!(Complex::new(2.0, 2.0), evaluate_polynomial(&vec![(1, 2)], &Complex::new(1.0, 1.0)));
+    }
+
+    #[test]
+    fn evaluate_polynomial_non_trivial_polynomial() {
+        assert_eq!(Complex::new(-4.0, 0.0), evaluate_polynomial(&vec![(-2, -2), (2, -2)], &Complex::new(1.0, 0.0)));
+        assert_eq!(Complex::new(4.0, 0.0), evaluate_polynomial(&vec![(-2, -2), (2, -2)], &Complex::new(0.0, 1.0)));
+        assert_eq!(Complex::new(0.0, -3.0), evaluate_polynomial(&vec![(-2, -2), (2, -2)], &Complex::new(1.0, 1.0)));
+    }
+
+    #[test]
     fn multiply_matrix_two_identities() {
         let a = Matrix::identity();
         let b = Matrix::identity();
@@ -126,34 +154,6 @@ mod tests {
 
         let actual = &mat1 * &mat2;
         assert_eq!(actual, mat3);
-    }
-
-    #[test]
-    fn evaluate_polynomial_trivial_polynomial() {
-        assert_eq!(Complex::zero(), evaluate_polynomial(&vec![], &Complex::new(1.0, 0.0)));
-        assert_eq!(Complex::zero(), evaluate_polynomial(&vec![], &Complex::new(0.0, 1.0)));
-        assert_eq!(Complex::zero(), evaluate_polynomial(&vec![], &Complex::new(1.0, 1.0)));
-    }
-
-    #[test]
-    fn evaluate_polynomial_constant_polynomial() {
-        assert_eq!(Complex::one(), evaluate_polynomial(&vec![(0, 1)], &Complex::new(1.0, 0.0)));
-        assert_eq!(Complex::one(), evaluate_polynomial(&vec![(0, 1)], &Complex::new(0.0, 1.0)));
-        assert_eq!(Complex::one(), evaluate_polynomial(&vec![(0, 1)], &Complex::new(1.0, 1.0)));
-    }
-
-    #[test]
-    fn evaluate_polynomial_linear_polynomial() {
-        assert_eq!(Complex::new(2.0, 0.0), evaluate_polynomial(&vec![(1, 2)], &Complex::new(1.0, 0.0)));
-        assert_eq!(Complex::new(0.0, 2.0), evaluate_polynomial(&vec![(1, 2)], &Complex::new(0.0, 1.0)));
-        assert_eq!(Complex::new(2.0, 2.0), evaluate_polynomial(&vec![(1, 2)], &Complex::new(1.0, 1.0)));
-    }
-
-    #[test]
-    fn evaluate_polynomial_non_trivial_polynomial() {
-        assert_eq!(Complex::new(-4.0, 0.0), evaluate_polynomial(&vec![(-2, -2), (2, -2)], &Complex::new(1.0, 0.0)));
-        assert_eq!(Complex::new(4.0, 0.0), evaluate_polynomial(&vec![(-2, -2), (2, -2)], &Complex::new(0.0, 1.0)));
-        assert_eq!(Complex::new(0.0, -3.0), evaluate_polynomial(&vec![(-2, -2), (2, -2)], &Complex::new(1.0, 1.0)));
     }
 }
 
