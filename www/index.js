@@ -50,11 +50,10 @@ document.getElementById("east-button").addEventListener("click", moveEast);
 document.getElementById("west-button").addEventListener("click", moveWest);
 
 function update_table() {
-    var el = "";
     var evaluated = easy.evaluated();
     var is_trivial = easy.evaluation_is_trivial();
     document.getElementById("matrices").innerHTML = '';
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < evaluated.length/9; i++) {
         var div = document.createElement("div");
         div.style.marginTop = "20px";
         div.style.backgroundColor = is_trivial[i] && word.textContent != "" ? "#77dd77" : "#ff6961";
@@ -70,21 +69,8 @@ function update_table() {
         }
         document.getElementById("matrices").appendChild(div);
     }
-    var evaluated_polar = easy.evaluated_polar();
-    for (var i = 0; i < 3; i++) {
-        var div = document.createElement("div");
-        div.style.marginTop = "20px";
-        div.style.backgroundColor = is_trivial[i] && word.textContent != "" ? "#77dd77" : "#ff6961";
-        var tbl = document.createElement("table");
-        div.appendChild(tbl);
-        for (var j = 0; j < 3; j++) {
-            var tr = tbl.insertRow()
-            for (var k = 0; k < 3; k++) {
-                var td = tr.insertCell();
-                td.style.width = "20em";
-                td.appendChild(document.createTextNode(evaluated_polar[9*i + 3*j + k]));
-            }
-        }
-        document.getElementById("matrices").appendChild(div);
-    }
+    document.getElementById("matrices").appendChild(document.createTextNode(easy.det()));
+    document.getElementById("matrices").appendChild(document.createElement("br"));
+    document.getElementById("matrices").appendChild(document.createTextNode(easy.tr()));
+
 }

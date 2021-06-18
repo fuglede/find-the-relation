@@ -17,19 +17,17 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 pub struct Game {
-    groups: [Group; 3],
-    evaluated: [[Complex<f64>; 9]; 3]
+    groups: Vec<Group>,
+    evaluated: Vec<[Complex<f64>; 9]>
 }
 
 #[wasm_bindgen]
 impl Game {
     pub fn easy() -> Game {
-        let groups = [
-            Group::new(&Complex::new(1.0, 0.0)),
+        let groups = vec![
             Group::new(&Complex::new(0.5, 0.0)),
-            Group::new(&Complex::from_polar(1.0, PI/5.0))
             ];
-        let evaluated = [groups[0].flatten(), groups[1].flatten(), groups[2].flatten()];
+        let evaluated = vec![groups[0].flatten()];
         Game {
             groups,
             evaluated
@@ -37,27 +35,30 @@ impl Game {
     }
 
     pub fn push(&mut self, direction: Direction) {
-        for i in 0..3 {
+        for i in 0..self.groups.len() {
             self.groups[i].push(&direction);
             self.evaluated[i] = self.groups[i].flatten();
         }
     }
 
     pub fn evaluated(&self) -> Array {
-        let arr = Array::new_with_length(27);
-        for i in 0..27 {
+        let length = (self.groups.len() as u32) * 9;
+        let arr = Array::new_with_length(length);
+        for i in 0..length {
             let (j, k) = div_mod_floor(i, 9);
-            let s = JsValue::from_str(&format!("{}", self.evaluated[j][k]));
+            let z = self.evaluated[j as usize][k as usize];
+            let s = JsValue::from_str(&format!("{}", z));
             arr.set(i as u32, s);
         }
         arr
     }
 
     pub fn evaluated_polar(&self) -> Array {
-        let arr = Array::new_with_length(27);
-        for i in 0..27 {
+        let length = (self.groups.len() as u32) * 9;
+        let arr = Array::new_with_length(length);
+        for i in 0..length {
             let (j, k) = div_mod_floor(i, 9);
-            let (r, theta) =  self.evaluated[j][k].to_polar();
+            let (r, theta) = self.evaluated[j as usize][k as usize].to_polar();
             let s = JsValue::from_str(&format!("({}, {})", r, theta));
             arr.set(i as u32, s);
         }
@@ -65,9 +66,28 @@ impl Game {
     }
 
     pub fn evaluation_is_trivial(&self) -> Array {
-        let arr = Array::new_with_length(3);
-        for i in 0..3 {
+        let length = self.groups.len();
+        let arr = Array::new_with_length(length as u32);
+        for i in 0..length {
             arr.set(i as u32, JsValue::from_bool(self.groups[i].current_is_identity()));
+        }
+        arr
+    }
+
+    pub fn det(&self) -> Array {
+        let length = self.groups.len();
+        let arr = Array::new_with_length(length as u32);
+        for i in 0..length {
+            arr.set(i as u32, JsValue::from_str(&format!("{}", self.groups[i].current_det())));
+        }
+        arr
+    }
+
+    pub fn tr(&self) -> Array {
+        let length = self.groups.len();
+        let arr = Array::new_with_length(length as u32);
+        for i in 0..length {
+            arr.set(i as u32, JsValue::from_str(&format!("{}", self.groups[i].current_tr())));
         }
         arr
     }
