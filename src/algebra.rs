@@ -22,7 +22,7 @@ impl Mul for &Matrix {
         let mut res = Matrix::zero();
         for i in 0..3 {
             for j in 0..3 {
-                res.d[i][j] = (0..3).map(|k| &self.d[i][k] * &rhs.d[k][j]).fold(Complex::new(0.0, 0.0), |sum, val| &sum + &val);
+                res.d[i][j] = (0..3).map(|k| &self.d[i][k] * &rhs.d[k][j]).sum();
             }
         }
         res
