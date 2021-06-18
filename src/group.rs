@@ -1,6 +1,7 @@
 use crate::algebra::{Polynomial,Matrix};
 use wasm_bindgen::prelude::*;
 use num::{ToPrimitive, Zero, complex::Complex};
+
 use std::collections::HashMap;
 
 #[repr(u8)]
@@ -22,33 +23,33 @@ pub struct Group {
 }
 
 impl Group {
-    pub fn new() -> Self {
+    pub fn new(q: &Complex<f64>) -> Self {
         // See https://arxiv.org/abs/1904.11730v3
         let mut north_matrix = Matrix::zero();
-        north_matrix.d[0][2] = Polynomial::new(vec![(-1, -1)]);
-        north_matrix.d[1][1] = Polynomial::new(vec![(1, -1)]);
-        north_matrix.d[1][2] = Polynomial::new(vec![(-1, -1), (1, 1)]);
-        north_matrix.d[2][0] = Polynomial::new(vec![(0, -1)]);
-        north_matrix.d[2][2] = Polynomial::new(vec![(-1, -1), (0, 1)]);
+        north_matrix.d[0][2] = Polynomial::new(vec![(-1, -1)]).evaluate(q);
+        north_matrix.d[1][1] = Polynomial::new(vec![(1, -1)]).evaluate(q);
+        north_matrix.d[1][2] = Polynomial::new(vec![(-1, -1), (1, 1)]).evaluate(q);
+        north_matrix.d[2][0] = Polynomial::new(vec![(0, -1)]).evaluate(q);
+        north_matrix.d[2][2] = Polynomial::new(vec![(-1, -1), (0, 1)]).evaluate(q);
 
         let mut south_matrix = Matrix::zero();
-        south_matrix.d[0][0] = Polynomial::new(vec![(0, 1), (1, -1)]);
-        south_matrix.d[0][2] = Polynomial::new(vec![(0, -1)]);
-        south_matrix.d[1][0] = Polynomial::new(vec![(-1, 1), (1, -1)]);
-        south_matrix.d[1][1] = Polynomial::new(vec![(-1, -1)]);
-        south_matrix.d[2][0] = Polynomial::new(vec![(1, -1)]);
+        south_matrix.d[0][0] = Polynomial::new(vec![(0, 1), (1, -1)]).evaluate(q);
+        south_matrix.d[0][2] = Polynomial::new(vec![(0, -1)]).evaluate(q);
+        south_matrix.d[1][0] = Polynomial::new(vec![(-1, 1), (1, -1)]).evaluate(q);
+        south_matrix.d[1][1] = Polynomial::new(vec![(-1, -1)]).evaluate(q);
+        south_matrix.d[2][0] = Polynomial::new(vec![(1, -1)]).evaluate(q);
 
         let mut east_matrix = Matrix::identity();
-        east_matrix.d[0][0] = Polynomial::new(vec![(-1, -1)]);
-        east_matrix.d[0][1] = Polynomial::one();
-        east_matrix.d[2][1] = Polynomial::one();
-        east_matrix.d[2][2] = Polynomial::new(vec![(1, -1)]);
+        east_matrix.d[0][0] = Polynomial::new(vec![(-1, -1)]).evaluate(q);
+        east_matrix.d[0][1] = Polynomial::one().evaluate(q);
+        east_matrix.d[2][1] = Polynomial::one().evaluate(q);
+        east_matrix.d[2][2] = Polynomial::new(vec![(1, -1)]).evaluate(q);
 
         let mut west_matrix = Matrix::identity();
-        west_matrix.d[0][0] = Polynomial::new(vec![(1, -1)]);
-        west_matrix.d[0][1] = Polynomial::new(vec![(1, 1)]);
-        west_matrix.d[2][1] = Polynomial::new(vec![(-1, 1)]);
-        west_matrix.d[2][2] = Polynomial::new(vec![(-1, -1)]);
+        west_matrix.d[0][0] = Polynomial::new(vec![(1, -1)]).evaluate(q);
+        west_matrix.d[0][1] = Polynomial::new(vec![(1, 1)]).evaluate(q);
+        west_matrix.d[2][1] = Polynomial::new(vec![(-1, 1)]).evaluate(q);
+        west_matrix.d[2][2] = Polynomial::new(vec![(-1, -1)]).evaluate(q);
 
         let current_matrix = Matrix::identity();
         Self { north_matrix, south_matrix, east_matrix, west_matrix, current_matrix }
@@ -64,13 +65,12 @@ impl Group {
         self.current_matrix = &self.current_matrix * &matrix;
     }
 
-    pub fn evaluate(&self, q: Complex<f64>) -> [Complex<f64>; 9] {
+    pub fn flatten(&self) -> [Complex<f64>; 9] {
         let mut res: [Complex<f64>; 9] = [Complex::new(0.0, 0.0); 9];
         for i in 0..3 {
             for j in 0..3 {
                 let index = 3*i + j;
-                let evaluation = evaluate_polynomial(&self.current_matrix.d[i][j], q);
-                res[index] = evaluation;
+                res[index] = self.current_matrix.d[i][j];
             }
         }
         res
@@ -84,47 +84,44 @@ pub fn evaluated_matrix_is_trivial(matrix: [Complex<f64>; 9]) -> bool {
     })
 }
 
-fn evaluate_polynomial(p: &Polynomial, q: Complex<f64>) -> Complex<f64> {
-    let mut res = Complex::new(0.0, 0.0);
-    for (pow, coef) in p.data.iter() {
-        res += (*coef).to_f64().unwrap() * q.powi(*pow)
-    }
-    res
-}
 
 #[cfg(test)]
 mod tests {
     use core::panic;
 
+    use num::BigInt;
+
     use super::*;
 
     #[test]
-    fn evaluate_trivial_matrix() {
-        let group = Group::new();
+    fn flatten_trivial_matrix() {
         let q = Complex::new(60.0, 42.0);
-        let evaluated = group.evaluate(q);
+        let group = Group::new(&q);
+        let evaluated = group.flatten();
         assert!(evaluated_matrix_is_trivial(evaluated));
     }
 
     #[test]
     fn evaluate_non_trivial_matrix() {
-        let mut group = Group::new();
-        group.push(&Direction::North);
         let q = Complex::new(60.0, 42.0);
-        let evaluated = group.evaluate(q);
+        let mut group = Group::new(&q);
+        group.push(&Direction::North);
+        let evaluated = group.flatten();
         assert!(!evaluated_matrix_is_trivial(evaluated));
     }
 
     #[test]
     fn pushing_north_moves_north() {
-        let mut group = Group::new();
+        let q = Complex::new(60.0, 42.0);
+        let mut group = Group::new(&q);
         group.push(&Direction::North);
         assert_eq!(group.current_matrix, group.north_matrix);
     }
 
     #[test]
     fn going_north_and_south_does_nothing() {
-        let mut group = Group::new();
+        let q = Complex::new(60.0, 42.0);
+        let mut group = Group::new(&q);
         group.push(&Direction::North);
         group.push(&Direction::South);
         assert_eq!(group.current_matrix, Matrix::identity());
@@ -132,7 +129,8 @@ mod tests {
 
     #[test]
     fn going_south_and_north_does_nothing() {
-        let mut group = Group::new();
+        let q = Complex::new(60.0, 42.0);
+        let mut group = Group::new(&q);
         group.push(&Direction::South);
         group.push(&Direction::North);
         assert_eq!(group.current_matrix, Matrix::identity());
@@ -140,7 +138,8 @@ mod tests {
 
     #[test]
     fn going_east_and_west_does_nothing() {
-        let mut group = Group::new();
+        let q = Complex::new(60.0, 42.0);
+        let mut group = Group::new(&q);
         group.push(&Direction::East);
         group.push(&Direction::West);
         assert_eq!(group.current_matrix, Matrix::identity());
@@ -148,78 +147,10 @@ mod tests {
 
     #[test]
     fn going_west_and_east_does_nothing() {
-        let mut group = Group::new();
+        let q = Complex::new(60.0, 42.0);
+        let mut group = Group::new(&q);
         group.push(&Direction::West);
         group.push(&Direction::East);
         assert_eq!(group.current_matrix, Matrix::identity());
-    }
-
-    #[test]
-    fn long_word() {
-        let s = "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEESSSSSSWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNWSSWWSWSWSWSWSSWWWWNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNWWWWWWWWSSWSWSWSWNENNWNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNEEEEEEEEEEEEE";
-        let mut group = Group::new();
-        for c in s.chars() {
-            let direction = match c {
-                'N' => Direction::North,
-                'S' => Direction::South,
-                'E' => Direction::East,
-                'W' => Direction::West,
-                _ => panic!()
-            };
-            group.push(&direction);
-        }
-        let eval = group.evaluate(Complex::new(-1.0, 0.0));
-        let res = &format!("{}", eval[7]);
-        assert_eq!(eval[7], Complex::new(-1.0, 0.0));
-    }
-    #[test]
-    fn long_word2() {
-        let s = "EEEESWWWNNNNENNWNEENWSWNEENNNESWNENENWSEENWNESSENWNEEEEEEEEEEEEEEEEEEEEEEEEEEEEESWWWWWWWWWWWWWWWWWWWWWWWWWNNNNNNNNNNNNNNNNNNNNNNNNNWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEENESWNWNWNWNWWWWWWWWWWWWWWWWWNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNESSSSEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSSSSSSSSSSSSWNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNWS";
-        let mut group = Group::new();
-        for c in s.chars() {
-            let direction = match c {
-                'N' => Direction::North,
-                'S' => Direction::South,
-                'E' => Direction::East,
-                'W' => Direction::West,
-                _ => panic!()
-            };
-            group.push(&direction);
-        }
-        let eval = group.evaluate(Complex::new(-1.0, 0.0));
-        let res = &format!("{}", eval[3]);
-        assert_eq!(eval[7], Complex::new(-1.0, 0.0));
-    }
-
-    #[test]
-    fn evaluate_polynomial_trivial_polynomial() {
-        let p = Polynomial::zero();
-        assert_eq!(Complex::new(0.0, 0.0), evaluate_polynomial(&p, Complex::new(1.0, 0.0)));
-        assert_eq!(Complex::new(0.0, 0.0), evaluate_polynomial(&p, Complex::new(0.0, 1.0)));
-        assert_eq!(Complex::new(0.0, 0.0), evaluate_polynomial(&p, Complex::new(1.0, 1.0)));
-    }
-
-    #[test]
-    fn evaluate_polynomial_constant_polynomial() {
-        let p = Polynomial::one();
-        assert_eq!(Complex::new(1.0, 0.0), evaluate_polynomial(&p, Complex::new(1.0, 0.0)));
-        assert_eq!(Complex::new(1.0, 0.0), evaluate_polynomial(&p, Complex::new(0.0, 1.0)));
-        assert_eq!(Complex::new(1.0, 0.0), evaluate_polynomial(&p, Complex::new(1.0, 1.0)));
-    }
-
-    #[test]
-    fn evaluate_polynomial_linear_polynomial() {
-        let p = Polynomial::new(vec![(1, 2)]);
-        assert_eq!(Complex::new(2.0, 0.0), evaluate_polynomial(&p, Complex::new(1.0, 0.0)));
-        assert_eq!(Complex::new(0.0, 2.0), evaluate_polynomial(&p, Complex::new(0.0, 1.0)));
-        assert_eq!(Complex::new(2.0, 2.0), evaluate_polynomial(&p, Complex::new(1.0, 1.0)));
-    }
-
-    #[test]
-    fn evaluate_polynomial_non_trivial_polynomial() {
-        let p = Polynomial::new(vec![(-2, -2), (2, -2)]);
-        assert_eq!(Complex::new(-4.0, 0.0), evaluate_polynomial(&p, Complex::new(1.0, 0.0)));
-        assert_eq!(Complex::new(4.0, 0.0), evaluate_polynomial(&p, Complex::new(0.0, 1.0)));
-        assert_eq!(Complex::new(0.0, -3.0), evaluate_polynomial(&p, Complex::new(1.0, 1.0)));
     }
 }

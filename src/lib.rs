@@ -16,8 +16,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 pub struct Game {
-    qs: [Complex<f64>; 3],
-    group: Group,
+    groups: [Group; 3],
     evaluated: [[Complex<f64>; 9]; 3],
     evaluated_is_trivial: [bool; 3]
 }
@@ -25,29 +24,27 @@ pub struct Game {
 #[wasm_bindgen]
 impl Game {
     pub fn easy() -> Game {
-        let group = Group::new();
-        let trivial_evaluated = group.evaluate(Complex::one());
-        let evaluated = [trivial_evaluated, trivial_evaluated, trivial_evaluated];
+        let groups = [
+            Group::new(&Complex::new(1.0, 0.0)),
+            Group::new(&Complex::new(-1.0, 0.0)),
+            Group::new(&Complex::new(0.0, 1.0))
+            ];
+        let evaluated = [groups[0].flatten(), groups[1].flatten(), groups[2].flatten()];
         let evaluated_is_trivial = [false; 3];
         Game {
-            qs: [Complex::new(1.0, 0.0), Complex::new(-1.0, 0.0), Complex::new(0.0, 1.0)],
-            group: group,
-            evaluated: evaluated,
-            evaluated_is_trivial: evaluated_is_trivial
+            groups,
+            evaluated,
+            evaluated_is_trivial
         }
     }
 
     pub fn push(&mut self, direction: Direction) {
-        self.group.push(&direction);
-        self.evaluated = [
-            self.group.evaluate(self.qs[0]),
-            self.group.evaluate(self.qs[1]),
-            self.group.evaluate(self.qs[2])];
-        self.evaluated_is_trivial = [
-            evaluated_matrix_is_trivial(self.evaluated[0]),
-            evaluated_matrix_is_trivial(self.evaluated[1]),
-            evaluated_matrix_is_trivial(self.evaluated[2])
-        ]
+        for i in 0..3 {
+            self.groups[i].push(&direction);
+            self.evaluated[i] = self.groups[i].flatten();
+            self.evaluated_is_trivial[i] =
+                evaluated_matrix_is_trivial(self.evaluated[i]);
+        }
     }
 
     pub fn evaluated(&self) -> Array {
