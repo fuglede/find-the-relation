@@ -67,6 +67,14 @@ impl Group {
         self.current_matrix == Matrix::identity()
     }
 
+    pub fn current_det(&self) -> Complex<f64> {
+        self.current_matrix.det()
+    }
+
+    pub fn current_tr(&self) -> Complex<f64> {
+        self.current_matrix.tr()
+    }
+
     pub fn flatten(&self) -> [Complex<f64>; 9] {
         let mut res: [Complex<f64>; 9] = [Complex::new(0.0, 0.0); 9];
         for i in 0..3 {

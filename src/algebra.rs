@@ -55,6 +55,14 @@ impl Matrix {
         }
         res
     }
+
+    pub fn det(&self) -> Complex<f64> {
+        (0..3).map(|i| self.d[i][i]).product()
+    }
+
+    pub fn tr(&self) -> Complex<f64> {
+        (0..3).map(|i| self.d[i][i]).sum()
+    }
 }
 
 #[cfg(test)]
