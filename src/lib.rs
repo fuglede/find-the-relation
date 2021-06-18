@@ -1,11 +1,13 @@
 mod algebra;
 mod group;
 
+use std::f64::consts::PI;
+
 use js_sys::{Array};
 use num::{Complex};
 use num::integer::{div_mod_floor};
 use wasm_bindgen::prelude::*;
-use crate::group::{Direction, Group, evaluated_matrix_is_trivial};
+use crate::group::{Direction, Group};
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -26,7 +28,7 @@ impl Game {
         let groups = [
             Group::new(&Complex::new(1.0, 0.0)),
             Group::new(&Complex::new(0.5, 0.0)),
-            Group::new(&Complex::new(0.0, 1.0))
+            Group::new(&Complex::from_polar(1.0, PI/5.0))
             ];
         let evaluated = [groups[0].flatten(), groups[1].flatten(), groups[2].flatten()];
         let evaluated_is_trivial = [false; 3];
@@ -41,8 +43,7 @@ impl Game {
         for i in 0..3 {
             self.groups[i].push(&direction);
             self.evaluated[i] = self.groups[i].flatten();
-            self.evaluated_is_trivial[i] =
-                evaluated_matrix_is_trivial(self.evaluated[i]);
+            self.evaluated_is_trivial[i] = self.groups[i].current_is_identity();
         }
     }
 

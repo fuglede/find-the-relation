@@ -63,6 +63,10 @@ impl Group {
         self.current_matrix = &self.current_matrix * &matrix;
     }
 
+    pub fn current_is_identity(&self) -> bool {
+        self.current_matrix == Matrix::identity()
+    }
+
     pub fn flatten(&self) -> [Complex<f64>; 9] {
         let mut res: [Complex<f64>; 9] = [Complex::new(0.0, 0.0); 9];
         for i in 0..3 {
@@ -75,33 +79,24 @@ impl Group {
     }
 }
 
-pub fn evaluated_matrix_is_trivial(matrix: [Complex<f64>; 9]) -> bool {
-    (0..9).all(|i| matrix[i] == match i {
-        0 | 4 | 8 => Complex::new(1.0, 0.0),
-        _ => Complex::new(0.0, 0.0)
-    })
-}
-
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn flatten_trivial_matrix() {
+    fn group_starts_at_identity() {
         let q = Complex::new(60.0, 42.0);
         let group = Group::new(&q);
-        let evaluated = group.flatten();
-        assert!(evaluated_matrix_is_trivial(evaluated));
+        assert!(group.current_is_identity());
     }
 
     #[test]
-    fn evaluate_non_trivial_matrix() {
+    fn group_moves_to_non_identity() {
         let q = Complex::new(60.0, 42.0);
         let mut group = Group::new(&q);
         group.push(&Direction::North);
-        let evaluated = group.flatten();
-        assert!(!evaluated_matrix_is_trivial(evaluated));
+        assert!(!group.current_is_identity());
     }
 
     #[test]
