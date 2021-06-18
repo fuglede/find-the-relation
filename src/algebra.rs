@@ -1,19 +1,19 @@
 //use hashbrown::HashMap;
 use std::collections::HashMap;
-use std::ops::{Mul};
+use std::ops::Mul;
 
-use num::{BigInt, Complex, ToPrimitive};
+use num::Complex;
 
 #[derive(Debug)]
 pub struct Polynomial {
-    pub data: HashMap<i32, BigInt>
+    pub data: HashMap<i32, i32>
 }
 
 impl Polynomial {
     pub fn new(elements: Vec<(i32, i32)>) -> Polynomial {
         let mut data = HashMap::new();
         for (a, b) in elements {
-            data.insert(a, BigInt::from(b));
+            data.insert(a, b);
         }
         Polynomial { data }
     }
@@ -25,7 +25,7 @@ impl Polynomial {
     pub fn evaluate(&self, q: &Complex<f64>) -> Complex<f64> {
         let mut res = Complex::new(0.0, 0.0);
         for (pow, coef) in self.data.iter() {
-            res += (*coef).to_f64().unwrap() * q.powi(*pow)
+            res += Complex::new(*coef as f64, 0.0) * q.powi(*pow)
         }
         res
     }
