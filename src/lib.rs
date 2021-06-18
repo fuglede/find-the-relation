@@ -18,8 +18,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 pub struct Game {
     groups: [Group; 3],
-    evaluated: [[Complex<f64>; 9]; 3],
-    evaluated_is_trivial: [bool; 3]
+    evaluated: [[Complex<f64>; 9]; 3]
 }
 
 #[wasm_bindgen]
@@ -31,11 +30,9 @@ impl Game {
             Group::new(&Complex::from_polar(1.0, PI/5.0))
             ];
         let evaluated = [groups[0].flatten(), groups[1].flatten(), groups[2].flatten()];
-        let evaluated_is_trivial = [false; 3];
         Game {
             groups,
-            evaluated,
-            evaluated_is_trivial
+            evaluated
         }
     }
 
@@ -43,7 +40,6 @@ impl Game {
         for i in 0..3 {
             self.groups[i].push(&direction);
             self.evaluated[i] = self.groups[i].flatten();
-            self.evaluated_is_trivial[i] = self.groups[i].current_is_identity();
         }
     }
 
@@ -71,7 +67,7 @@ impl Game {
     pub fn evaluation_is_trivial(&self) -> Array {
         let arr = Array::new_with_length(3);
         for i in 0..3 {
-            arr.set(i as u32, JsValue::from_bool(self.evaluated_is_trivial[i]));
+            arr.set(i as u32, JsValue::from_bool(self.groups[i].current_is_identity()));
         }
         arr
     }
