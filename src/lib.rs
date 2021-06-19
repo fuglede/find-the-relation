@@ -17,21 +17,25 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 pub struct Game {
+    qs: Vec<Complex<f64>>,
     groups: Vec<Group>,
     evaluated: Vec<[Complex<f64>; 9]>
 }
 
 #[wasm_bindgen]
 impl Game {
-    pub fn easy() -> Game {
-        let groups = vec![
-            Group::new(&Complex::new(0.5, 0.0)),
-            ];
+    fn new(qs: Vec<Complex<f64>>) -> Game {
+        let groups: Vec<Group> = qs.iter().map(Group::new).collect();
         let evaluated = vec![groups[0].flatten()];
         Game {
+            qs,
             groups,
             evaluated
         }
+    }
+
+    pub fn easy() -> Game {
+        Self::new(vec![Complex::new(0.25, 0.0)])
     }
 
     pub fn push(&mut self, direction: Direction) {
@@ -61,6 +65,15 @@ impl Game {
             let (r, theta) = self.evaluated[j as usize][k as usize].to_polar();
             let s = JsValue::from_str(&format!("({}, {})", r, theta));
             arr.set(i as u32, s);
+        }
+        arr
+    }
+
+    pub fn qs(&self) -> Array {
+        let length = self.groups.len();
+        let arr = Array::new_with_length(length as u32);
+        for i in 0..length {
+            arr.set(i as u32, JsValue::from_str(&format!("{}", self.qs[i])));
         }
         arr
     }
