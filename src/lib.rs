@@ -2,7 +2,9 @@ mod algebra;
 mod group;
 
 use std::f64::consts::PI;
+use std::str;
 
+use dtoa;
 use js_sys::{Array};
 use num::{Complex};
 use num::integer::{div_mod_floor};
@@ -26,7 +28,8 @@ pub struct Game {
 impl Game {
     fn new(qs: Vec<Complex<f64>>) -> Game {
         let groups: Vec<Group> = qs.iter().map(Group::new).collect();
-        let evaluated = vec![groups[0].flatten()];
+        let evaluated = groups.iter().map(
+            |g| g.flatten()).collect();
         Game {
             qs,
             groups,
@@ -35,7 +38,8 @@ impl Game {
     }
 
     pub fn easy() -> Game {
-        Self::new(vec![Complex::new(0.25, 0.0)])
+        Self::new(vec![Complex::new(0.25, 0.0),
+            Complex::from_polar(1.0, PI/3.0)])
     }
 
     pub fn push(&mut self, direction: Direction) {
@@ -51,7 +55,7 @@ impl Game {
         for i in 0..length {
             let (j, k) = div_mod_floor(i, 9);
             let z = self.evaluated[j as usize][k as usize];
-            let s = JsValue::from_str(&format!("{}", z));
+            let s = JsValue::from_str(&ztoa(&z));
             arr.set(i as u32, s);
         }
         arr
@@ -63,7 +67,7 @@ impl Game {
         for i in 0..length {
             let (j, k) = div_mod_floor(i, 9);
             let (r, theta) = self.evaluated[j as usize][k as usize].to_polar();
-            let s = JsValue::from_str(&format!("({}, {})", r, theta));
+            let s = JsValue::from_str(&format!("({:.5}, {:.5})", r, theta));
             arr.set(i as u32, s);
         }
         arr
@@ -73,7 +77,7 @@ impl Game {
         let length = self.groups.len();
         let arr = Array::new_with_length(length as u32);
         for i in 0..length {
-            arr.set(i as u32, JsValue::from_str(&format!("{}", self.qs[i])));
+            arr.set(i as u32, JsValue::from_str(&format!("{:.5}", self.qs[i])));
         }
         arr
     }
@@ -91,7 +95,7 @@ impl Game {
         let length = self.groups.len();
         let arr = Array::new_with_length(length as u32);
         for i in 0..length {
-            arr.set(i as u32, JsValue::from_str(&format!("{}", self.groups[i].current_det())));
+            arr.set(i as u32, JsValue::from_str(&format!("{:.5}", self.groups[i].current_det())));
         }
         arr
     }
@@ -100,8 +104,18 @@ impl Game {
         let length = self.groups.len();
         let arr = Array::new_with_length(length as u32);
         for i in 0..length {
-            arr.set(i as u32, JsValue::from_str(&format!("{}", self.groups[i].current_tr())));
+            arr.set(i as u32, JsValue::from_str(&format!("{:.5}", self.groups[i].current_tr())));
         }
         arr
     }
+}
+
+fn f64toa(x: &f64) -> String {
+    let mut buf = Vec::new();
+    dtoa::write(&mut buf, *x).unwrap();
+    format!("{}", str::from_utf8(&buf).unwrap())
+}
+
+fn ztoa(z: &Complex<f64>) -> String {
+    format!("{} + {}i", f64toa(&z.re), f64toa(&z.im))
 }
