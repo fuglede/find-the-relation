@@ -1,0 +1,25 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download wasm-pack
+        run: |
+          wget https://github.com/rustwasm/wasm-pack/releases/download/v0.9.1/wasm-pack-v0.9.1-x86_64-unknown-linux-musl.tar.gz
+          tar --strip-components=1  -zxvf wasm-pack-v0.9.1-x86_64-unknown-linux-musl.tar.gz
+
+      - name: Build WASM project
+        run: ./wasm-pack build
+
+      - name: Build frontend
+        run: |
+          cd www
+          npm install
+          npm run build
