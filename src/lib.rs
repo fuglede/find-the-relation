@@ -113,8 +113,8 @@ impl Game {
         level_descriptions.push(
             "Final level! As our final challenge, we will consider 𝑞 = 3.
             It is an open question of mathematics whether or not this one is
-            possible. If you find a solution, or if you find that none exist,
-            please get in touch."
+            possible. If you find a solution, or if you find that none can 
+            possibly exist, please get in touch."
             .to_owned());
 
         let active_level = 0;
