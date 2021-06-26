@@ -56,6 +56,17 @@ impl Matrix {
         res
     }
 
+    pub fn distance_from_identity(&self) -> f64 {
+        let mut norm_square = 0.0;
+        for i in 0..3 {
+            for j in 0..3 {
+                let target = Complex::new(if j == i { 1.0 } else { 0.0 }, 0.0);
+                norm_square += (self.d[i][j] - target).norm_sqr()
+            }
+        }
+        norm_square.sqrt()
+    }
+
     pub fn det(&self) -> Complex<f64> {
         self.d[0][0] * (self.d[1][1] * self.d[2][2] - self.d[1][2] * self.d[2][1]) -
             self.d[0][1] * (self.d[1][0] * self.d[2][2] - self.d[1][2] * self.d[2][0]) +
@@ -64,6 +75,17 @@ impl Matrix {
 
     pub fn tr(&self) -> Complex<f64> {
         (0..3).map(|i| self.d[i][i]).sum()
+    }
+
+    pub fn flatten(&self) -> [Complex<f64>; 9] {
+        let mut res: [Complex<f64>; 9] = [Complex::new(0.0, 0.0); 9];
+        for i in 0..3 {
+            for j in 0..3 {
+                let index = 3*i + j;
+                res[index] = self.d[i][j];
+            }
+        }
+        res
     }
 }
 

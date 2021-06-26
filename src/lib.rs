@@ -298,7 +298,7 @@ impl Level {
             let distance_string = if self.word.len() == 0 {
                 "∞".to_owned()
             } else {
-                format!("{:.5}", self.groups[i].distance())
+                format!("{:.5}", self.groups[i].distance_from_identity())
             };
             arr.set(i as u32, JsValue::from_str(&distance_string));
         }

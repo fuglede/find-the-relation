@@ -69,15 +69,8 @@ impl Group {
         self.current_matrix == Matrix::identity()
     }
 
-    pub fn distance(&self) -> f64 {
-        let mut norm_square = 0.0;
-        for i in 0..3 {
-            for j in 0..3 {
-                let target = Complex::new(if j == i { 1.0 } else { 0.0 }, 0.0);
-                norm_square += (self.current_matrix.d[i][j] - target).norm_sqr()
-            }
-        }
-        norm_square.sqrt()
+    pub fn distance_from_identity(&self) -> f64 {
+        self.current_matrix.distance_from_identity()
     }
 
     pub fn current_det(&self) -> Complex<f64> {
@@ -89,14 +82,7 @@ impl Group {
     }
 
     pub fn flatten(&self) -> [Complex<f64>; 9] {
-        let mut res: [Complex<f64>; 9] = [Complex::new(0.0, 0.0); 9];
-        for i in 0..3 {
-            for j in 0..3 {
-                let index = 3*i + j;
-                res[index] = self.current_matrix.d[i][j];
-            }
-        }
-        res
+        self.current_matrix.flatten()
     }
 }
 
