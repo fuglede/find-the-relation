@@ -88,6 +88,7 @@ function update_game_view() {
     var evaluated = game.evaluated();
     var is_trivial = game.evaluation_is_trivial();
     var qs = game.qs();
+    var distances = game.distance();
 
     document.getElementById("completed").style.display = "none";
     document.getElementById("description").textContent = game.level_description();
@@ -95,7 +96,7 @@ function update_game_view() {
     document.getElementById("matrices").innerHTML = '';
     for (var i = 0; i < evaluated.length/9; i++) {
         var div = document.createElement("div");
-        var qtest = document.createTextNode("𝑞 = " + qs[i] + ":");
+        var qtest = document.createTextNode("𝑞 = " + qs[i] + ". Distance from target: " + distances[i]);
         div.appendChild(qtest);
         div.style.marginTop = "20px";
         div.style.backgroundColor = is_trivial[i] && word.textContent != "" ? "#77dd77" : "#333333";

@@ -151,6 +151,10 @@ impl Game {
         self.levels[self.active_level].reset();
     }
 
+    pub fn distance(&self) -> Array {
+        self.levels[self.active_level].distance()
+    }
+
     pub fn evaluated(&self) -> Array {
         self.levels[self.active_level].evaluated()
     }
@@ -285,6 +289,20 @@ impl Level {
 
     pub fn is_solved(&self) -> bool {
         self.word.len() > 0 && self.groups.iter().all(|g| g.current_is_identity())
+    }
+
+    pub fn distance(&self) -> Array {
+        let length = self.groups.len();
+        let arr = Array::new_with_length(length as u32);
+        for i in 0..length {
+            let distance_string = if self.word.len() == 0 {
+                "∞".to_owned()
+            } else {
+                format!("{:.5}", self.groups[i].distance())
+            };
+            arr.set(i as u32, JsValue::from_str(&distance_string));
+        }
+        arr
     }
 
     pub fn det(&self) -> Array {
