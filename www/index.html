@@ -3,16 +3,164 @@
   <head>
     <meta charset="utf-8">
     <title>Find the relation!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <style>
+      body, html {
+        height: 100%;
+      }
+      body {
+        background-color: #151515;
+        color: #ffbb39;
+        font-family: 'Segoe UI', 'San Francisco', 'Ubuntu', 'Roboto', sans-serif;
+      }
+      button {
+        border: none;
+        padding: 5px 10px 5px 10px;
+        background-color: #252525;
+        color: #ffbb39;
+        width: 100%;
+      }
+      table {
+        margin-bottom: 20px;
+      }
+      td {
+        width: 10vw;
+      }
+      a {
+        color: #ffdd50;
+      }
+      a:hover {
+        color: #ffee60;
+      }
+
+      .menu-item {
+        background-color: #252525;
+        width: 100%;
+        padding: 10px 0px 10px 20px;
+        cursor: pointer;
+      }
+      .menu-item:hover {
+        background-color: #353535;
+      }
+    </style>
   </head>
   <body>
     <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
     <script src="./bootstrap.js"></script>
-    <table>
-      <tr><td></td><td><button id="north-button">North</button></td><td></td></tr>
-      <tr><td><button id="west-button">West</button></td><td></td><td><button id="east-button">East</button></td></tr>
-      <tr><td></td><td><button id="south-button">South</button></td><td></td></tr>
-    </table>
-    <div id="word"></div>
-    <div id="matrices"></div>
+    <div class="container-fluid d-flex flex-column" style="height: 100%">
+      <div class="row flex-fill">
+        <div class="col-2 d-flex flex-column" style="background-color: #252525; padding: 0px;">
+          <div class="menu-item" id="rules-menu-item">Rules and about</div>
+          <div class="menu-item" id="level-0">Level 1: Baby steps <span id="level-0-completed"></span></div>
+          <div class="menu-item" id="level-1">Level 2: Negative <span id="level-1-completed"></span></div>
+          <div class="menu-item" id="level-2">Level 3: Imaginary <span id="level-2-completed"></span></div>
+          <div class="menu-item" id="level-3">Level 4: All at once <span id="level-3-completed"></span></div>
+          <div class="menu-item" id="level-4">Level 5: Circular 1 <span id="level-4-completed"></span></div>
+          <div class="menu-item" id="level-5">Level 6: Circular 2 <span id="level-5-completed"></span></div>
+          <div class="menu-item" id="level-6">Level 7: Coprime <span id="level-6-completed"></span></div>
+          <div class="menu-item" id="level-7">Level 8: Growth <span id="level-7-completed"></span></div>
+          <div class="menu-item" id="level-8">Level 9: Boss fight <span id="level-8-completed"></span></div>
+          <div class="h-100"></div>
+        </div>
+        <div class="col-10 d-flex flex-column" style="padding: 0px;">
+          <div id="landing" style="text-align: center">
+            <h1 style="font-size: 8vw; margin-top: 30vh;">Find the relation</h1>
+            <h4>The search for Burau's missing kernel</h4>
+          </div>
+          <div id="rules" style="display: none; padding: 25px">
+            <h1>Rules</h1>
+            <p>
+              The game is made up of 9 levels. In each level you are controlling a set of 3x3 <a href="https://en.wikipedia.org/wiki/Matrix_(mathematics)">matrices</a> over
+              the <a href="https://en.wikipedia.org/wiki/Complex_number">complex numbers</a>. By moving in one of the four compass directions, you <a href="https://en.wikipedia.org/wiki/Matrix_multiplication">multiply your matrices</a>
+              with another matrix, whose entries depend on the direction and the particular level you are in.
+            </p>
+            <p>
+              The goal of the game is to find a non-trivial path so that each of your matrices become
+              the <a href="https://en.wikipedia.org/wiki/Identity_matrix">identity matrix</a>. The rules are set up so that if you move back and forth, for instance
+              east, then west, then you get back to where you started, but this is not necessarily the case
+              if you move in a full square, say east, north, west, south. If this sounds a bit weird, just think of it
+              as if you are moving around in <a href="https://upload.wikimedia.org/wikipedia/commons/d/d2/Cayley_graph_of_F2.svg">
+              this graph</a>.
+            </p>
+            <p>
+              The levels are related. In each level, the matrices are parametrized by a non-zero complex number 𝑞, which
+              differs from level to level, and in some levels, multiple values 𝑞 are used at the same time.
+              The matrices given as follows:
+            </p>
+            <h4>North</h4>
+            <table>
+              <tr><td>0</td><td>0</td><td>−1/𝑞</td></tr>
+              <tr><td>0</td><td>−𝑞</td><td>−1/𝑞 + 𝑞</td></tr>
+              <tr><td>−1</td><td>0</td><td>−1/𝑞 + 1</td></tr>
+            </table>
+            <h4>South</h4>
+            <table>
+              <tr><td>1 − 𝑞</td><td>0</td><td>−1</td></tr>
+              <tr><td>1/𝑞 − 𝑞</td><td>−1/𝑞</td><td>0</td></tr>
+              <tr><td>−𝑞</td><td>0</td><td>0</td></tr>
+            </table>
+            <h4>East</h4>
+            <table>
+              <tr><td>−1/𝑞</td><td>1</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>−𝑞</td></tr>
+            </table>
+            <h4>West</h4>
+            <table>
+              <tr><td>−𝑞</td><td>𝑞</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>0</td><td>1/𝑞</td><td>−1/𝑞</td></tr>
+            </table>
+            <p>
+              If this seems like a mouthful, the easiest way to get a feel for the game is to play the first
+              few levels, then revisit this set of rules.
+            </p>
+            <h1>About</h1>
+            <p>
+              The matrices as given above are taken from <a href="https://arxiv.org/abs/1904.11730v3">this paper</a>.
+              It is an open problem in mathematics to determine whether a non-trivial path which takes you back
+              to the identity matrix for any given value of 𝑞 exists. In this game, we attack the less ambitious
+              problem of trying to find paths for fixed values of 𝑞. Nevertheless, I am not familiar with solutions
+              to the final levels of the game, and so finding those is the same as pushing the frontier of mathematics.
+            </p>
+            <p>
+              It being impossible to find a path that works for any given value of 𝑞 is equivalent to the
+              open problem that the so-called <a href="https://en.wikipedia.org/wiki/Burau_representation">
+              Burau representation</a> of the <a href="https://en.wikipedia.org/wiki/Braid_group">braid group on four strands</a> is 
+              <a href="https://en.wikipedia.org/wiki/Faithful_representation">faithful</a>. First studied in the
+              1930s, besides making an appearance in the <a href="https://en.wikipedia.org/wiki/Group_(mathematics)">group theory</a>
+              of the braid groups, the Burau representation
+              also shows up in <a href="https://en.wikipedia.org/wiki/Topological_quantum_field_theory">quantum field theory</a>,
+              where it acts on the space of states for a certain
+              2-dimensional disk with defects. They also make an appearance in <a href="https://en.wikipedia.org/wiki/Topological_quantum_computer">quantum computing</a>, where
+              the matrices show up as quantum gates.
+            </p>
+            <p>
+              The neat thing is that you don't need to worry about what any of those words actually mean. To
+              understand the problem, all you need to understand is multiplication of complex matrices, which
+              is something that is generally taught at high school or first year undergrad level mathematics.
+            </p>
+            <p>
+              The source code for the game is <a href="https://github.com/fuglede/find-the-relation">available on GitHub</a>.
+            </p>
+          </div>
+          <div id="game" style="display: none; padding: 25px;">
+            <h1><span id="level-header"></span></h1>
+            <div id="description"></div>
+            <table style="margin-top: 20px">
+              <tr><td></td><td><button id="north-button">North (w, ↑)</button></td><td></td></tr>
+              <tr><td><button id="west-button">West (a, ←)</button></td><td><button id="reset-button" style="width: 100%">Reset (r)</button></td><td><button id="east-button">East (d, →)</button></td></tr>
+              <tr><td></td><td><button id="south-button">South (s, ↓)</button></td><td></td></tr>
+            </table>
+            <div>Current path: <span id="word" style="word-wrap: break-word;"></span></div>
+            <div id="matrices"></div>
+            <div id="completed" style="display: none; margin-bottom: 20px;">
+              <h1>Level completed!</h1>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
