@@ -37,15 +37,17 @@ impl Group {
         south_matrix.d[1][1] = evaluate_polynomial(&vec![(-1, -1)], &q);
         south_matrix.d[2][0] = evaluate_polynomial(&vec![(1, -1)], &q);
 
-        let mut east_matrix = Matrix::identity();
+        let mut east_matrix = Matrix::zero();
         east_matrix.d[0][0] = evaluate_polynomial(&vec![(-1, -1)], &q);
         east_matrix.d[0][1] = evaluate_polynomial(&vec![(0, 1)], &q);
+        east_matrix.d[1][1] = evaluate_polynomial(&vec![(0, 1)], &q);
         east_matrix.d[2][1] = evaluate_polynomial(&vec![(0, 1)], &q);
         east_matrix.d[2][2] = evaluate_polynomial(&vec![(1, -1)], &q);
 
-        let mut west_matrix = Matrix::identity();
+        let mut west_matrix = Matrix::zero();
         west_matrix.d[0][0] = evaluate_polynomial(&vec![(1, -1)], &q);
         west_matrix.d[0][1] = evaluate_polynomial(&vec![(1, 1)], &q);
+        west_matrix.d[1][1] = evaluate_polynomial(&vec![(0, 1)], &q);
         west_matrix.d[2][1] = evaluate_polynomial(&vec![(-1, 1)], &q);
         west_matrix.d[2][2] = evaluate_polynomial(&vec![(-1, -1)], &q);
 
