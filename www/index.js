@@ -99,6 +99,7 @@ function update_game_view() {
         var qtest = document.createTextNode("𝑞 = " + qs[i] + ". Distance from target: " + distances[i]);
         div.appendChild(qtest);
         div.style.marginTop = "20px";
+        div.style.padding = "10px";
         div.style.backgroundColor = is_trivial[i] && word.textContent != "" ? "#77dd77" : "#333333";
         div.style.color = is_trivial[i] && word.textContent != "" ? "#333333" : "#f5bc41";
         var tbl = document.createElement("table");
