@@ -142,20 +142,20 @@ impl Game {
         arr
     }
 
-    pub fn evaluated(&self) -> Array {
+    pub fn matrix_entries(&self) -> Array {
         let level = &self.levels[self.active_level];
         let length = (level.groups.len() as u32) * 9;
         let arr = Array::new_with_length(length);
         for i in 0..length {
             let (j, k) = div_mod_floor(i, 9);
-            let z = level.evaluated[j as usize][k as usize];
+            let z = level.flattened[j as usize][k as usize];
             let s = JsValue::from_str(&ztoa(&z));
             arr.set(i as u32, s);
         }
         arr
     }
 
-    pub fn evaluation_is_trivial(&self) -> Array {
+    pub fn matrix_is_identity(&self) -> Array {
         let level = &self.levels[self.active_level];
         let length = level.groups.len();
         let arr = Array::new_with_length(length as u32);
@@ -207,20 +207,20 @@ pub struct Level {
     qs: Vec<Complex<f64>>,
     groups: Vec<Group>,
     word: Vec<Direction>,
-    evaluated: Vec<[Complex<f64>; 9]>
+    flattened: Vec<[Complex<f64>; 9]>
 }
 
 impl Level {
     fn new(qs: Vec<Complex<f64>>) -> Level {
         let groups: Vec<Group> = Self::make_groups(&qs);
-        let evaluated = groups.iter().map(
+        let flattened = groups.iter().map(
             |g| g.flatten()).collect();
         let word = vec![];
         Level {
             qs,
             groups,
             word,
-            evaluated
+            flattened
         }
     }
 
@@ -244,17 +244,17 @@ impl Level {
         } else {
             self.word.push(direction);
         }
-        self.update_evaluated();
+        self.update_flattened();
     }
 
     pub fn reset(&mut self) {
         self.groups = Self::make_groups(&self.qs);
         self.word = vec![];
-        self.update_evaluated();
+        self.update_flattened();
     }
 
-    fn update_evaluated(&mut self) {
-        self.evaluated = self.groups.iter().map(|g| g.flatten()).collect();
+    fn update_flattened(&mut self) {
+        self.flattened = self.groups.iter().map(|g| g.flatten()).collect();
     }
 
     pub fn word(&self) -> String {

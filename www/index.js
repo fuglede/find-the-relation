@@ -76,8 +76,8 @@ function move(direction) {
 }
 
 function update_game_view() {
-    var evaluated = game.evaluated();
-    var is_trivial = game.evaluation_is_trivial();
+    var entries = game.matrix_entries();
+    var is_trivial = game.matrix_is_identity();
     var qs = game.qs();
     var distances = game.distance();
 
@@ -85,7 +85,7 @@ function update_game_view() {
     $("description").textContent = game.level_description();
     $("word").textContent = game.word();
     $("matrices").innerHTML = '';
-    for (var i = 0; i < evaluated.length/9; i++) {
+    for (var i = 0; i < entries.length / 9; i++) {
         var div = document.createElement("div");
         var qtest = document.createTextNode("𝑞 = " + qs[i] + ". Distance from target: " + distances[i]);
         div.appendChild(qtest);
@@ -100,7 +100,7 @@ function update_game_view() {
             for (var k = 0; k < 3; k++) {
                 var td = tr.insertCell();
                 td.style.width = "20em";
-                td.appendChild(document.createTextNode(evaluated[9*i + 3*j + k]));
+                td.appendChild(document.createTextNode(entries[9*i + 3*j + k]));
             }
         }
         $("matrices").appendChild(div);
