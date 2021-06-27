@@ -136,8 +136,46 @@ impl Game {
         let level_qs = self.qs[self.active_level].clone();
         let length = level_qs.len();
         let arr = Array::new_with_length(length as u32);
-        for (i, item) in level_qs.iter().enumerate().take(length) {
+        for (i, item) in level_qs.iter().enumerate() {
             arr.set(i as u32, JsValue::from_str(&item.to_string()));
+        }
+        arr
+    }
+
+    pub fn evaluated(&self) -> Array {
+        let level = &self.levels[self.active_level];
+        let length = (level.groups.len() as u32) * 9;
+        let arr = Array::new_with_length(length);
+        for i in 0..length {
+            let (j, k) = div_mod_floor(i, 9);
+            let z = level.evaluated[j as usize][k as usize];
+            let s = JsValue::from_str(&ztoa(&z));
+            arr.set(i as u32, s);
+        }
+        arr
+    }
+
+    pub fn evaluation_is_trivial(&self) -> Array {
+        let level = &self.levels[self.active_level];
+        let length = level.groups.len();
+        let arr = Array::new_with_length(length as u32);
+        for (i, group) in level.groups.iter().enumerate() {
+            arr.set(i as u32, JsValue::from_bool(group.current_is_identity()));
+        }
+        arr
+    }
+
+    pub fn distance(&self) -> Array {
+        let level = &self.levels[self.active_level];
+        let length = level.groups.len();
+        let arr = Array::new_with_length(length as u32);
+        for (i, group) in level.groups.iter().enumerate() {
+            let distance_string = if level.word.is_empty() {
+                "∞".to_owned()
+            } else {
+                format!("{:.5}", group.distance_from_identity())
+            };
+            arr.set(i as u32, JsValue::from_str(&distance_string));
         }
         arr
     }
@@ -148,18 +186,6 @@ impl Game {
 
     pub fn reset(&mut self) {
         self.levels[self.active_level].reset();
-    }
-
-    pub fn distance(&self) -> Array {
-        self.levels[self.active_level].distance()
-    }
-
-    pub fn evaluated(&self) -> Array {
-        self.levels[self.active_level].evaluated()
-    }
-
-    pub fn evaluation_is_trivial(&self) -> Array {
-        self.levels[self.active_level].evaluation_is_trivial()
     }
 
     pub fn is_solved(&self) -> bool {
@@ -176,6 +202,7 @@ impl Default for Game {
         Self::new()       
     }                     
 }
+
 pub struct Level {
     qs: Vec<Complex<f64>>,
     groups: Vec<Group>,
@@ -230,18 +257,6 @@ impl Level {
         self.evaluated = self.groups.iter().map(|g| g.flatten()).collect();
     }
 
-    pub fn evaluated(&self) -> Array {
-        let length = (self.groups.len() as u32) * 9;
-        let arr = Array::new_with_length(length);
-        for i in 0..length {
-            let (j, k) = div_mod_floor(i, 9);
-            let z = self.evaluated[j as usize][k as usize];
-            let s = JsValue::from_str(&ztoa(&z));
-            arr.set(i as u32, s);
-        }
-        arr
-    }
-
     pub fn word(&self) -> String {
         self.word.iter().map(|d| match d {
             Direction::North => 'N',
@@ -251,31 +266,8 @@ impl Level {
         }).collect::<String>()
     }
 
-    pub fn evaluation_is_trivial(&self) -> Array {
-        let length = self.groups.len();
-        let arr = Array::new_with_length(length as u32);
-        for i in 0..length {
-            arr.set(i as u32, JsValue::from_bool(self.groups[i].current_is_identity()));
-        }
-        arr
-    }
-
     pub fn is_solved(&self) -> bool {
         !self.word.is_empty() && self.groups.iter().all(|g| g.current_is_identity())
-    }
-
-    pub fn distance(&self) -> Array {
-        let length = self.groups.len();
-        let arr = Array::new_with_length(length as u32);
-        for i in 0..length {
-            let distance_string = if self.word.is_empty() {
-                "∞".to_owned()
-            } else {
-                format!("{:.5}", self.groups[i].distance_from_identity())
-            };
-            arr.set(i as u32, JsValue::from_str(&distance_string));
-        }
-        arr
     }
 }
 
