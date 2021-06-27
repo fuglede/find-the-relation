@@ -73,14 +73,6 @@ impl Group {
         self.current_matrix.distance_from_identity()
     }
 
-    pub fn current_det(&self) -> Complex<f64> {
-        self.current_matrix.det()
-    }
-
-    pub fn current_tr(&self) -> Complex<f64> {
-        self.current_matrix.tr()
-    }
-
     pub fn flatten(&self) -> [Complex<f64>; 9] {
         self.current_matrix.flatten()
     }

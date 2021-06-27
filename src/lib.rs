@@ -176,8 +176,6 @@ impl Default for Game {
         Self::new()       
     }                     
 }
-
-#[wasm_bindgen]
 pub struct Level {
     qs: Vec<Complex<f64>>,
     groups: Vec<Group>,
@@ -185,7 +183,6 @@ pub struct Level {
     evaluated: Vec<[Complex<f64>; 9]>
 }
 
-#[wasm_bindgen]
 impl Level {
     fn new(qs: Vec<Complex<f64>>) -> Level {
         let groups: Vec<Group> = Self::make_groups(&qs);
@@ -202,14 +199,6 @@ impl Level {
 
     fn make_groups(qs: &[Complex<f64>]) -> Vec<Group> {
         qs.iter().map(Group::new).collect()
-    }
-
-    pub fn easy() -> Level {
-        Self::new(vec![
-            Complex::new(1.0, 0.0),
-            Complex::new(-1.0, 0.0),
-            Complex::new(0.0, 1.0),
-        ])
     }
 
     pub fn push(&mut self, direction: Direction) {
@@ -253,18 +242,6 @@ impl Level {
         arr
     }
 
-    pub fn evaluated_polar(&self) -> Array {
-        let length = (self.groups.len() as u32) * 9;
-        let arr = Array::new_with_length(length);
-        for i in 0..length {
-            let (j, k) = div_mod_floor(i, 9);
-            let (r, theta) = self.evaluated[j as usize][k as usize].to_polar();
-            let s = JsValue::from_str(&format!("({:.5}, {:.5})", r, theta));
-            arr.set(i as u32, s);
-        }
-        arr
-    }
-
     pub fn word(&self) -> String {
         self.word.iter().map(|d| match d {
             Direction::North => 'N',
@@ -272,15 +249,6 @@ impl Level {
             Direction::East => 'E',
             Direction::West => 'W',
         }).collect::<String>()
-    }
-
-    pub fn qs(&self) -> Array {
-        let length = self.groups.len();
-        let arr = Array::new_with_length(length as u32);
-        for i in 0..length {
-            arr.set(i as u32, JsValue::from_str(&format!("{:.5}", self.qs[i])));
-        }
-        arr
     }
 
     pub fn evaluation_is_trivial(&self) -> Array {
@@ -306,24 +274,6 @@ impl Level {
                 format!("{:.5}", self.groups[i].distance_from_identity())
             };
             arr.set(i as u32, JsValue::from_str(&distance_string));
-        }
-        arr
-    }
-
-    pub fn det(&self) -> Array {
-        let length = self.groups.len();
-        let arr = Array::new_with_length(length as u32);
-        for i in 0..length {
-            arr.set(i as u32, JsValue::from_str(&format!("{:.5}", self.groups[i].current_det())));
-        }
-        arr
-    }
-
-    pub fn tr(&self) -> Array {
-        let length = self.groups.len();
-        let arr = Array::new_with_length(length as u32);
-        for i in 0..length {
-            arr.set(i as u32, JsValue::from_str(&format!("{:.5}", self.groups[i].current_tr())));
         }
         arr
     }

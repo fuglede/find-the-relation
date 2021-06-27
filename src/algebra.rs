@@ -63,16 +63,6 @@ impl Matrix {
         norm_square.sqrt()
     }
 
-    pub fn det(&self) -> Complex<f64> {
-        self.d[0][0] * (self.d[1][1] * self.d[2][2] - self.d[1][2] * self.d[2][1]) -
-            self.d[0][1] * (self.d[1][0] * self.d[2][2] - self.d[1][2] * self.d[2][0]) +
-            self.d[0][2] * (self.d[1][0] * self.d[2][1] - self.d[1][1] * self.d[2][0])
-    }
-
-    pub fn tr(&self) -> Complex<f64> {
-        (0..3).map(|i| self.d[i][i]).sum()
-    }
-
     pub fn flatten(&self) -> [Complex<f64>; 9] {
         let mut res: [Complex<f64>; 9] = [Complex::new(0.0, 0.0); 9];
         for i in 0..3 {
