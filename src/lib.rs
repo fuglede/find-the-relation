@@ -4,9 +4,8 @@ mod group;
 use std::f64::consts::PI;
 use std::str;
 
-use dtoa;
-use js_sys::{Array};
-use num::{Complex};
+use js_sys::Array;
+use num::Complex;
 use num::integer::{div_mod_floor};
 use wasm_bindgen::prelude::*;
 use crate::group::{Direction, Group};
@@ -137,8 +136,8 @@ impl Game {
         let level_qs = self.qs[self.active_level].clone();
         let length = level_qs.len();
         let arr = Array::new_with_length(length as u32);
-        for i in 0..length {
-            arr.set(i as u32, JsValue::from_str(&format!("{}", level_qs[i])));
+        for (i, item) in level_qs.iter().enumerate().take(length) {
+            arr.set(i as u32, JsValue::from_str(&item.to_string()));
         }
         arr
     }
@@ -172,6 +171,12 @@ impl Game {
     }
 }
 
+impl Default for Game {   
+    fn default() -> Self {
+        Self::new()       
+    }                     
+}
+
 #[wasm_bindgen]
 pub struct Level {
     qs: Vec<Complex<f64>>,
@@ -195,7 +200,7 @@ impl Level {
         }
     }
 
-    fn make_groups(qs: &Vec<Complex<f64>>) -> Vec<Group> {
+    fn make_groups(qs: &[Complex<f64>]) -> Vec<Group> {
         qs.iter().map(Group::new).collect()
     }
 
@@ -211,7 +216,7 @@ impl Level {
         for i in 0..self.groups.len() {
             self.groups[i].push(&direction);
         }
-        let last_is_opposite = self.word.len() != 0 &&
+        let last_is_opposite = !self.word.is_empty() &&
             self.word.last().unwrap() == &match direction {
             Direction::North => Direction::South,
             Direction::South => Direction::North,
@@ -288,14 +293,14 @@ impl Level {
     }
 
     pub fn is_solved(&self) -> bool {
-        self.word.len() > 0 && self.groups.iter().all(|g| g.current_is_identity())
+        !self.word.is_empty() && self.groups.iter().all(|g| g.current_is_identity())
     }
 
     pub fn distance(&self) -> Array {
         let length = self.groups.len();
         let arr = Array::new_with_length(length as u32);
         for i in 0..length {
-            let distance_string = if self.word.len() == 0 {
+            let distance_string = if self.word.is_empty() {
                 "∞".to_owned()
             } else {
                 format!("{:.5}", self.groups[i].distance_from_identity())
@@ -327,7 +332,7 @@ impl Level {
 fn f64toa(x: &f64) -> String {
     let mut buf = Vec::new();
     dtoa::write(&mut buf, *x).unwrap();
-    format!("{}", str::from_utf8(&buf).unwrap())
+    str::from_utf8(&buf).unwrap().to_string()
 }
 
 fn ztoa(z: &Complex<f64>) -> String {

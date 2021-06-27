@@ -24,32 +24,32 @@ impl Group {
     pub fn new(q: &Complex<f64>) -> Self {
         // See https://arxiv.org/abs/1904.11730v3
         let mut north_matrix = Matrix::zero();
-        north_matrix.d[0][2] = evaluate_polynomial(&vec![(-1, -1)], &q);
-        north_matrix.d[1][1] = evaluate_polynomial(&vec![(1, -1)], &q);
-        north_matrix.d[1][2] = evaluate_polynomial(&vec![(-1, -1), (1, 1)], &q);
-        north_matrix.d[2][0] = evaluate_polynomial(&vec![(0, -1)], &q);
-        north_matrix.d[2][2] = evaluate_polynomial(&vec![(-1, -1), (0, 1)], &q);
+        north_matrix.d[0][2] = evaluate_polynomial(&[(-1, -1)], &q);
+        north_matrix.d[1][1] = evaluate_polynomial(&[(1, -1)], &q);
+        north_matrix.d[1][2] = evaluate_polynomial(&[(-1, -1), (1, 1)], &q);
+        north_matrix.d[2][0] = evaluate_polynomial(&[(0, -1)], &q);
+        north_matrix.d[2][2] = evaluate_polynomial(&[(-1, -1), (0, 1)], &q);
 
         let mut south_matrix = Matrix::zero();
-        south_matrix.d[0][0] = evaluate_polynomial(&vec![(0, 1), (1, -1)], &q);
-        south_matrix.d[0][2] = evaluate_polynomial(&vec![(0, -1)], &q);
-        south_matrix.d[1][0] = evaluate_polynomial(&vec![(-1, 1), (1, -1)], &q);
-        south_matrix.d[1][1] = evaluate_polynomial(&vec![(-1, -1)], &q);
-        south_matrix.d[2][0] = evaluate_polynomial(&vec![(1, -1)], &q);
+        south_matrix.d[0][0] = evaluate_polynomial(&[(0, 1), (1, -1)], &q);
+        south_matrix.d[0][2] = evaluate_polynomial(&[(0, -1)], &q);
+        south_matrix.d[1][0] = evaluate_polynomial(&[(-1, 1), (1, -1)], &q);
+        south_matrix.d[1][1] = evaluate_polynomial(&[(-1, -1)], &q);
+        south_matrix.d[2][0] = evaluate_polynomial(&[(1, -1)], &q);
 
         let mut east_matrix = Matrix::zero();
-        east_matrix.d[0][0] = evaluate_polynomial(&vec![(-1, -1)], &q);
-        east_matrix.d[0][1] = evaluate_polynomial(&vec![(0, 1)], &q);
-        east_matrix.d[1][1] = evaluate_polynomial(&vec![(0, 1)], &q);
-        east_matrix.d[2][1] = evaluate_polynomial(&vec![(0, 1)], &q);
-        east_matrix.d[2][2] = evaluate_polynomial(&vec![(1, -1)], &q);
+        east_matrix.d[0][0] = evaluate_polynomial(&[(-1, -1)], &q);
+        east_matrix.d[0][1] = evaluate_polynomial(&[(0, 1)], &q);
+        east_matrix.d[1][1] = evaluate_polynomial(&[(0, 1)], &q);
+        east_matrix.d[2][1] = evaluate_polynomial(&[(0, 1)], &q);
+        east_matrix.d[2][2] = evaluate_polynomial(&[(1, -1)], &q);
 
         let mut west_matrix = Matrix::zero();
-        west_matrix.d[0][0] = evaluate_polynomial(&vec![(1, -1)], &q);
-        west_matrix.d[0][1] = evaluate_polynomial(&vec![(1, 1)], &q);
-        west_matrix.d[1][1] = evaluate_polynomial(&vec![(0, 1)], &q);
-        west_matrix.d[2][1] = evaluate_polynomial(&vec![(-1, 1)], &q);
-        west_matrix.d[2][2] = evaluate_polynomial(&vec![(-1, -1)], &q);
+        west_matrix.d[0][0] = evaluate_polynomial(&[(1, -1)], &q);
+        west_matrix.d[0][1] = evaluate_polynomial(&[(1, 1)], &q);
+        west_matrix.d[1][1] = evaluate_polynomial(&[(0, 1)], &q);
+        west_matrix.d[2][1] = evaluate_polynomial(&[(-1, 1)], &q);
+        west_matrix.d[2][2] = evaluate_polynomial(&[(-1, -1)], &q);
 
         let current_matrix = Matrix::identity();
         Self { north_matrix, south_matrix, east_matrix, west_matrix, current_matrix }
@@ -62,7 +62,7 @@ impl Group {
             Direction::East => &self.east_matrix,
             Direction::West => &self.west_matrix
         };
-        self.current_matrix = &self.current_matrix * &matrix;
+        self.current_matrix = &self.current_matrix * matrix;
     }
 
     pub fn current_is_identity(&self) -> bool {

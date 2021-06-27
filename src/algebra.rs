@@ -2,12 +2,8 @@ use std::ops::Mul;
 
 use num::Complex;
 
-pub fn evaluate_polynomial(summands: &Vec<(i32, i32)>, q: &Complex<f64>)  -> Complex<f64> {
-    let mut res = Complex::new(0.0, 0.0);
-    for (exp, coef) in summands {
-        res += Complex::new(*coef as f64, 0.0) * q.powi(*exp);
-    }
-    res
+pub fn evaluate_polynomial(summands: &[(i32, i32)], q: &Complex<f64>)  -> Complex<f64> {
+    summands.iter().map(|(exp, coef)| Complex::new(*coef as f64, 0.0) * q.powi(*exp)).sum()
 }
 
 #[derive(Debug)]
@@ -22,7 +18,7 @@ impl Mul for &Matrix {
         let mut res = Matrix::zero();
         for i in 0..3 {
             for j in 0..3 {
-                res.d[i][j] = (0..3).map(|k| &self.d[i][k] * &rhs.d[k][j]).sum();
+                res.d[i][j] = (0..3).map(|k| self.d[i][k] * rhs.d[k][j]).sum();
             }
         }
         res
