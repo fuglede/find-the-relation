@@ -1,28 +1,29 @@
 import { Game, Direction } from "find-the-relation";
 
+const $ = elementId => document.getElementById(elementId);
+var menuItems = document.getElementsByClassName("menu-item");
+
 const game = Game.new();
 
-var menuItems = document.getElementsByClassName("menu-item");
 var gameViewActive = false;
 
 function navigate(i) {
-    console.log(i)
-    document.getElementById("rules-menu-item").style.backgroundColor = "#252525";
+    $("rules-menu-item").style.backgroundColor = "#252525";
     for (var j = 0; j < menuItems.length - 1; j++) {
-        document.getElementById("level-" + j).style.backgroundColor = "#252525";
+        $("level-" + j).style.backgroundColor = "#252525";
     }
     if (i == 0) {
-        document.getElementById("landing").style.display = "none";
-        document.getElementById("rules").style.display = "";
-        document.getElementById("game").style.display = "none";
-        document.getElementById("rules-menu-item").style.backgroundColor = "#151515";
+        $("landing").style.display = "none";
+        $("rules").style.display = "";
+        $("game").style.display = "none";
+        $("rules-menu-item").style.backgroundColor = "#151515";
         gameViewActive = false;
     } else {
-        document.getElementById("landing").style.display = "none";
-        document.getElementById("rules").style.display = "none";
-        document.getElementById("game").style.display = "";
-        document.getElementById("level-header").textContent = document.getElementById("level-" + (i - 1)).innerText;
-        document.getElementById("level-" + (i - 1)).style.backgroundColor = "#151515";
+        $("landing").style.display = "none";
+        $("rules").style.display = "none";
+        $("game").style.display = "";
+        $("level-header").textContent = $("level-" + (i - 1)).innerText;
+        $("level-" + (i - 1)).style.backgroundColor = "#151515";
         game.change_level(i - 1);
         gameViewActive = true;
         update_game_view();
@@ -35,6 +36,11 @@ for (var i = 0; i < menuItems.length; i++) {
 };
 
 window.addEventListener("keydown", keydownHandler, false);
+
+const moveNorth = () => move(Direction.North);
+const moveSouth = () => move(Direction.South);
+const moveEast = () => move(Direction.East);
+const moveWest = () => move(Direction.West);
 
 function keydownHandler(e) {
     if (!gameViewActive) return;
@@ -51,22 +57,13 @@ function keydownHandler(e) {
         reset();
     }
 }
-  
-function moveNorth() {
-    move(Direction.North);
-}
 
-function moveSouth() {
-    move(Direction.South);
-}
+$("north-button").addEventListener("click", moveNorth);
+$("south-button").addEventListener("click", moveSouth);
+$("east-button").addEventListener("click", moveEast);
+$("west-button").addEventListener("click", moveWest);
+$("reset-button").addEventListener("click", reset);
 
-function moveEast() {
-    move(Direction.East);
-}
-
-function moveWest() {
-    move(Direction.West);
-}
 
 function reset() {
     game.reset();
@@ -78,22 +75,16 @@ function move(direction) {
     update_game_view();
 }
 
-document.getElementById("north-button").addEventListener("click", moveNorth);
-document.getElementById("south-button").addEventListener("click", moveSouth);
-document.getElementById("east-button").addEventListener("click", moveEast);
-document.getElementById("west-button").addEventListener("click", moveWest);
-document.getElementById("reset-button").addEventListener("click", reset);
-
 function update_game_view() {
     var evaluated = game.evaluated();
     var is_trivial = game.evaluation_is_trivial();
     var qs = game.qs();
     var distances = game.distance();
 
-    document.getElementById("completed").style.display = "none";
-    document.getElementById("description").textContent = game.level_description();
-    document.getElementById("word").textContent = game.word();
-    document.getElementById("matrices").innerHTML = '';
+    $("completed").style.display = "none";
+    $("description").textContent = game.level_description();
+    $("word").textContent = game.word();
+    $("matrices").innerHTML = '';
     for (var i = 0; i < evaluated.length/9; i++) {
         var div = document.createElement("div");
         var qtest = document.createTextNode("𝑞 = " + qs[i] + ". Distance from target: " + distances[i]);
@@ -112,12 +103,12 @@ function update_game_view() {
                 td.appendChild(document.createTextNode(evaluated[9*i + 3*j + k]));
             }
         }
-        document.getElementById("matrices").appendChild(div);
+        $("matrices").appendChild(div);
     }
     if (game.is_solved()) {
-        document.getElementById("completed").style.display = "";
+        $("completed").style.display = "";
         let current_level = game.active_level();
-        document.getElementById("level-" + current_level + "-completed").innerHTML = "✅";
-        document.getElementById("level-header").textContent = document.getElementById("level-" + current_level).innerText;
+        $("level-" + current_level + "-completed").innerHTML = "✅";
+        $("level-header").textContent = $("level-" + current_level).innerText;
     }
 }
