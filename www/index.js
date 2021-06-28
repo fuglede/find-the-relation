@@ -99,7 +99,7 @@ function update_game_view() {
             var tr = tbl.insertRow()
             for (var k = 0; k < 3; k++) {
                 var td = tr.insertCell();
-                td.style.width = "20em";
+                td.style.width = "30em";
                 td.appendChild(document.createTextNode(entries[9*i + 3*j + k]));
             }
         }
