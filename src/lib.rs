@@ -1,14 +1,15 @@
 mod algebra;
 mod group;
+mod level;
 
 use std::f64::consts::PI;
-use std::str;
 
 use js_sys::Array;
 use num::Complex;
 use num::integer::{div_mod_floor};
 use wasm_bindgen::prelude::*;
-use crate::group::{Direction, Group};
+use crate::group::Direction;
+use crate::level::Level;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -203,80 +204,28 @@ impl Default for Game {
     }                     
 }
 
-pub struct Level {
-    qs: Vec<Complex<f64>>,
-    groups: Vec<Group>,
-    word: Vec<Direction>,
-    flattened: Vec<[Complex<f64>; 9]>
-}
-
-impl Level {
-    fn new(qs: Vec<Complex<f64>>) -> Level {
-        let groups: Vec<Group> = Self::make_groups(&qs);
-        let flattened = groups.iter().map(
-            |g| g.flatten()).collect();
-        let word = vec![];
-        Level {
-            qs,
-            groups,
-            word,
-            flattened
-        }
-    }
-
-    fn make_groups(qs: &[Complex<f64>]) -> Vec<Group> {
-        qs.iter().map(Group::new).collect()
-    }
-
-    pub fn push(&mut self, direction: Direction) {
-        for i in 0..self.groups.len() {
-            self.groups[i].push(&direction);
-        }
-        let last_is_opposite = !self.word.is_empty() &&
-            self.word.last().unwrap() == &match direction {
-            Direction::North => Direction::South,
-            Direction::South => Direction::North,
-            Direction::East => Direction::West,
-            Direction::West => Direction::East
-        };
-        if last_is_opposite {
-            self.word.pop();
-        } else {
-            self.word.push(direction);
-        }
-        self.update_flattened();
-    }
-
-    pub fn reset(&mut self) {
-        self.groups = Self::make_groups(&self.qs);
-        self.word = vec![];
-        self.update_flattened();
-    }
-
-    fn update_flattened(&mut self) {
-        self.flattened = self.groups.iter().map(|g| g.flatten()).collect();
-    }
-
-    pub fn word(&self) -> String {
-        self.word.iter().map(|d| match d {
-            Direction::North => 'N',
-            Direction::South => 'S',
-            Direction::East => 'E',
-            Direction::West => 'W',
-        }).collect::<String>()
-    }
-
-    pub fn is_solved(&self) -> bool {
-        !self.word.is_empty() && self.groups.iter().all(|g| g.current_is_identity())
-    }
-}
-
 fn f64toa(x: &f64) -> String {
     let mut buf = Vec::new();
     dtoa::write(&mut buf, *x).unwrap();
-    str::from_utf8(&buf).unwrap().to_string()
+    std::str::from_utf8(&buf).unwrap().to_string()
 }
 
 fn ztoa(z: &Complex<f64>) -> String {
     format!("{} + {}𝑖", f64toa(&z.re), f64toa(&z.im))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn f64toa_works_small_number() {
+        let actual = f64toa(&2.0);
+        assert_eq!("2.0", actual);
+    }
+    #[test]
+    fn f64toa_works_large_number() {
+        let actual = f64toa(&2e25);
+        assert_eq!("2e25", actual);
+    }
 }
