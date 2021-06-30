@@ -2,7 +2,7 @@ use crate::group::{Direction, Group};
 use num::Complex;
 
 pub struct Level {
-    qs: Vec<Complex<f64>>,
+    pub qs: Vec<Complex<f64>>,
     pub groups: Vec<Group>,
     pub word: Vec<Direction>,
     pub flattened: Vec<[Complex<f64>; 9]>

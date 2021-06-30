@@ -149,9 +149,10 @@ impl Game {
         let arr = Array::new_with_length(length);
         for i in 0..length {
             let (j, k) = div_mod_floor(i, 9);
-            let z = level.flattened[j as usize][k as usize];
-            let s = JsValue::from_str(&ztoa(&z));
-            arr.set(i as u32, s);
+            let z = &level.flattened[j as usize][k as usize];
+            // Only show imaginary part if 𝑞 itself is non-real.
+            let s = if level.qs[j as usize].im == 0.0 { f64toa(&z.re) } else { ztoa(z) };
+            arr.set(i as u32, JsValue::from_str(&s));
         }
         arr
     }
